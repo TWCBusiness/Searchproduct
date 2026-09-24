@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบค้นหาและเปรียบเทียบสินค้าจริง - Product Intelligence</title>
+  <title>Product Intelligence System - ระบบเปรียบเทียบสินค้า</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -39,25 +39,47 @@
       <div class="border-b border-slate-100 pb-4 mb-6">
         <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
           <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          ระบุคำค้นหา หรือเลือกหมวดหมู่สินค้า
+          ระบุคำค้นหา หรือ อัปโหลดรูปภาพเพื่อค้นหา
         </h2>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <!-- Input Text -->
-        <div class="space-y-1.5">
+        <!-- Input Text & Image Upload -->
+        <div class="space-y-3">
           <label class="block text-xs font-semibold text-slate-700">พิมพ์ชื่อสินค้า / คุณลักษณะที่ต้องการค้นหา</label>
-          <input type="text" id="searchInput" placeholder="เช่น บราไร้ขอบ Seamless, สปอร์ตบรา..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+          <div class="relative flex items-center">
+            <input type="text" id="searchInput" placeholder="เช่น Wacoal Wireless Bra บราไร้โครง รุ่น WB3A14" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            
+            <!-- ปุ่มอัปโหลดรูปภาพ (Image Search Button) -->
+            <label for="imageUpload" class="absolute right-2 p-1.5 bg-slate-200/60 hover:bg-slate-300 text-slate-600 rounded-lg cursor-pointer transition-all" title="อัปโหลดรูปภาพเพื่อค้นหา">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </label>
+            <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+          </div>
+
+          <!-- กล่องตัวอย่างรูปภาพที่อัปโหลด (Image Preview Box) -->
+          <div id="imagePreviewContainer" class="hidden flex items-center justify-between bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
+            <div class="flex items-center space-x-3">
+              <img id="imagePreview" src="" alt="Selected Preview" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
+              <div>
+                <p id="imageFileName" class="text-xs font-semibold text-slate-800 truncate max-w-[180px] sm:max-w-[250px]">filename.jpg</p>
+                <p class="text-[10px] text-blue-600 font-medium">แนบรูปภาพแล้ว (ระบบจะค้นหาด้วยรูปภาพนี้)</p>
+              </div>
+            </div>
+            <button onclick="removeSelectedImage()" class="p-1 hover:bg-blue-100 text-slate-400 hover:text-rose-500 rounded-lg transition-all" title="ยกเลิกรูปนี้">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
         </div>
 
         <!-- Preset Categories -->
-        <div class="space-y-1.5">
+        <div class="space-y-3">
           <label class="block text-xs font-semibold text-slate-700">หรือ เลือกหมวดหมู่สำเร็จรูป</label>
           <select id="categorySelect" onchange="applyCategory()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
             <option value="">-- เลือกจากหมวดหมู่ --</option>
+            <option value="บราไร้โครง Wireless Bra">บราไร้โครง Wireless Bra</option>
             <option value="ชุดชั้นในกระชับสัดส่วน Seamless">ชุดชั้นในกระชับสัดส่วน Seamless</option>
             <option value="สปอร์ตบราผ้าระบายอากาศ">สปอร์ตบราผ้าระบายอากาศ</option>
-            <option value="บราไร้โครง ผ้านุ่มพิเศษ">บราไร้โครง ผ้านุ่มพิเศษ</option>
           </select>
         </div>
       </div>
@@ -89,9 +111,12 @@
   </main>
 
   <script>
-    // ⚠️ นำ Web App URL ที่ได้จากการ Deploy Google Apps Script มาวางที่นี่
+    // ⚠️ วาง Web App URL ที่ได้จาก Google Apps Script
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec";
 
+    let selectedBase64Image = null;
+
+    // เลือกหมวดหมู่สำเร็จรูป
     function applyCategory() {
       const selected = document.getElementById("categorySelect").value;
       if (selected) {
@@ -99,8 +124,31 @@
       }
     }
 
+    // เมื่อผู้ใช้เลือกรูปภาพ
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          selectedBase64Image = e.target.result; // เก็บ Base64 ของรูป
+          document.getElementById("imagePreview").src = selectedBase64Image;
+          document.getElementById("imageFileName").innerText = file.name;
+          document.getElementById("imagePreviewContainer").classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // ลบรูปภาพที่เลือกไว้
+    function removeSelectedImage() {
+      selectedBase64Image = null;
+      document.getElementById("imageUpload").value = "";
+      document.getElementById("imagePreviewContainer").classList.add("hidden");
+    }
+
+    // ฟังก์ชันสั่งการค้นหา
     async function executeRealSearch() {
-      const query = document.getElementById("searchInput").value.trim() || "ชุดชั้นใน Seamless";
+      const textQuery = document.getElementById("searchInput").value.trim() || "ชุดชั้นใน Seamless";
       const section = document.getElementById("comparisonSection");
       const grid = document.getElementById("comparisonGrid");
       const countLabel = document.getElementById("resultCount");
@@ -111,19 +159,39 @@
         return;
       }
 
-      // 1. แสดง UI สถาวะกำลังค้นหา (Loading State)
       section.classList.remove("hidden");
-      keywordLabel.innerText = `กำลังค้นหาข้อมูลจริงสำหรับ: "${query}"`;
+      
+      if (selectedBase64Image) {
+        keywordLabel.innerText = `ค้นหาด้วยรูปภาพ + คำค้นหา: "${textQuery}"`;
+      } else {
+        keywordLabel.innerText = `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
+      }
+
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">ระบบกำลังดึงข้อมูลและรูปภาพสินค้าจริงจากเว็บออนไลน์...</p>
+          <p class="text-slate-600 font-medium text-sm">ระบบกำลังวิเคราะห์ข้อมูล และดึงผลลัพธ์จาก API...</p>
         </div>
       `;
 
       try {
-        // 2. เรียกไปยัง Google Apps Script API
-        const response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(query)}`);
+        let response;
+        
+        // ถ้ามีการเลือกรูปภาพ ให้ส่งแบบ POST (พร้อมข้อมูลรูปภาพ Base64)
+        if (selectedBase64Image) {
+          response = await fetch(GAS_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" }, // ป้องกัน CORS Preflight บน GAS
+            body: JSON.stringify({
+              query: textQuery,
+              image: selectedBase64Image
+            })
+          });
+        } else {
+          // ถ้าไม่มีรูป ส่งแบบ GET ปกติ
+          response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(textQuery)}`);
+        }
+
         const result = await response.json();
 
         if (result.status !== "success") {
@@ -135,19 +203,18 @@
         countLabel.innerText = `พบ ${items.length} รายการ`;
 
         if (items.length === 0) {
-          grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรูปภาพสินค้าที่เกี่ยวข้อง กรุณาลองใช้คำค้นหาอื่น</div>`;
+          grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่เกี่ยวข้อง</div>`;
           return;
         }
 
-        // 3. วนลูปสร้างการ์ดพร้อมแสดงรูปภาพและแบรนด์จริง
+        // แสดงผลลัพธ์รายการสินค้า
         items.forEach(item => {
           const cardHtml = `
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <!-- ส่วนแสดงรูปภาพสินค้าจริง -->
                 <div class="h-52 bg-slate-100 relative overflow-hidden border-b border-slate-100 flex items-center justify-center p-2">
                   <img 
-                    src="${item.imgUrl}" 
+                    src="${item.imgUrl || 'https://via.placeholder.com/300x300?text=No+Image'}" 
                     alt="${item.title}" 
                     class="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text=No+Image';"
@@ -157,7 +224,6 @@
                   </span>
                 </div>
 
-                <!-- ข้อมูลสินค้า -->
                 <div class="p-5 space-y-3">
                   <div class="flex items-center justify-between">
                     <span class="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -170,7 +236,7 @@
                   
                   <div class="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-xs font-medium border border-emerald-100 flex items-start gap-1.5">
                     <span class="flex-shrink-0">🏷️</span>
-                    <span>${item.promo}</span>
+                    <span>${item.promo || 'โปรโมชันพิเศษ'}</span>
                   </div>
 
                   <p class="text-xs text-slate-600 line-clamp-2 pt-1">
@@ -179,11 +245,10 @@
                 </div>
               </div>
 
-              <!-- ปุ่มไปยังหน้าสินค้าจริง -->
               <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-500">${item.price}</span>
+                <span class="text-xs text-slate-500">${item.price || 'สอบถามราคา'}</span>
                 <a 
-                  href="${item.productUrl}" 
+                  href="${item.productUrl || '#'}" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"
