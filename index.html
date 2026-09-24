@@ -124,16 +124,36 @@
       }
     }
 
-    // เมื่อผู้ใช้เลือกรูปภาพ
+// ย่อขนาดรูปภาพก่อนแปลงเป็น Base64 เพื่อป้องกัน Failed to fetch
     function handleImageSelect(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          selectedBase64Image = e.target.result; // เก็บ Base64 ของรูป
-          document.getElementById("imagePreview").src = selectedBase64Image;
-          document.getElementById("imageFileName").innerText = file.name;
-          document.getElementById("imagePreviewContainer").classList.remove("hidden");
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800; // จำกัดความกว้างสูงสุด 800px
+            const scaleSize = MAX_WIDTH / img.width;
+            
+            if (scaleSize < 1) {
+              canvas.width = MAX_WIDTH;
+              canvas.height = img.height * scaleSize;
+            } else {
+              canvas.width = img.width;
+              canvas.height = img.height;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // บีบอัดรูปภาพเป็น JPEG คุณภาพ 0.7
+            selectedBase64Image = canvas.toDataURL('image/jpeg', 0.7);
+            document.getElementById("imagePreview").src = selectedBase64Image;
+            document.getElementById("imageFileName").innerText = file.name;
+            document.getElementById("imagePreviewContainer").classList.remove("hidden");
+          };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -146,8 +166,7 @@
       document.getElementById("imagePreviewContainer").classList.add("hidden");
     }
 
-    // ฟังก์ชันสั่งการค้นหา
-    async function executeRealSearch() {
+async function executeRealSearch() {
       const textQuery = document.getElementById("searchInput").value.trim() || "ชุดชั้นใน Seamless";
       const section = document.getElementById("comparisonSection");
       const grid = document.getElementById("comparisonGrid");
@@ -170,25 +189,24 @@
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">ระบบกำลังวิเคราะห์ข้อมูล และดึงผลลัพธ์จาก API...</p>
+          <p class="text-slate-600 font-medium text-sm">ระบบกำลังวิเคราะห์รูปภาพและข้อมูลด้วย Claude Vision API...</p>
         </div>
       `;
 
       try {
         let response;
         
-        // ถ้ามีการเลือกรูปภาพ ให้ส่งแบบ POST (พร้อมข้อมูลรูปภาพ Base64)
         if (selectedBase64Image) {
+          // ส่ง POST โดยใช้ Content-Type: text/plain เพื่อข้าม CORS Preflight
           response = await fetch(GAS_API_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" }, // ป้องกัน CORS Preflight บน GAS
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               query: textQuery,
               image: selectedBase64Image
             })
           });
         } else {
-          // ถ้าไม่มีรูป ส่งแบบ GET ปกติ
           response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(textQuery)}`);
         }
 
@@ -207,54 +225,41 @@
           return;
         }
 
-        // แสดงผลลัพธ์รายการสินค้า
         items.forEach(item => {
           const cardHtml = `
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <div class="h-52 bg-slate-100 relative overflow-hidden border-b border-slate-100 flex items-center justify-center p-2">
-                  <img 
-                    src="${item.imgUrl || 'https://via.placeholder.com/300x300?text=No+Image'}" 
-                    alt="${item.title}" 
-                    class="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
-                    onerror="this.onerror=null; this.src='https://via.placeholder.com/300x300?text=No+Image';"
-                  />
-                  <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200 shadow-sm">
+                <div class="p-5 bg-gradient-to-br from-slate-50 to-indigo-50/30 border-b border-slate-100 flex items-center justify-between">
+                  <span class="text-sm font-bold text-blue-600 uppercase tracking-wider bg-blue-100/60 px-3 py-1 rounded-lg">
+                    ${item.brand}
+                  </span>
+                  <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">
                     ${item.matchScore}
                   </span>
                 </div>
 
                 <div class="p-5 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                      ${item.brand}
-                    </span>
-                  </div>
-                  <h4 class="font-bold text-slate-900 text-sm leading-snug line-clamp-2" title="${item.title}">
+                  <h4 class="font-bold text-slate-900 text-base leading-snug">
                     ${item.title}
                   </h4>
                   
-                  <div class="bg-emerald-50 text-emerald-800 p-2.5 rounded-xl text-xs font-medium border border-emerald-100 flex items-start gap-1.5">
-                    <span class="flex-shrink-0">🏷️</span>
-                    <span>${item.promo || 'โปรโมชันพิเศษ'}</span>
+                  <div class="text-lg font-bold text-slate-800">
+                    💰 ${item.price}
                   </div>
 
-                  <p class="text-xs text-slate-600 line-clamp-2 pt-1">
+                  <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60 flex items-start gap-1.5">
+                    <span class="flex-shrink-0">⭐</span>
+                    <span>${item.promo}</span>
+                  </div>
+
+                  <p class="text-xs text-slate-600 leading-relaxed pt-1">
                     ${item.details}
                   </p>
                 </div>
               </div>
 
-              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-500">${item.price || 'สอบถามราคา'}</span>
-                <a 
-                  href="${item.productUrl || '#'}" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                  เปิดดูหน้าเว็บจริง ↗
-                </a>
+              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 text-right">
+                <span class="text-xs font-medium text-slate-400">วิเคราะห์ข้อมูลผ่าน Claude Vision</span>
               </div>
             </div>
           `;
