@@ -128,7 +128,7 @@
           const img = new Image();
           img.onload = function() {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800;
+            const MAX_WIDTH = 512; // ย่อรูปอ้างอิงก่อนส่ง → อัปโหลดและวิเคราะห์เร็วขึ้น
             const scaleSize = MAX_WIDTH / img.width;
             
             if (scaleSize < 1) {
@@ -142,7 +142,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            selectedBase64Image = canvas.toDataURL('image/jpeg', 0.7);
+            selectedBase64Image = canvas.toDataURL('image/jpeg', 0.8);
             document.getElementById("imagePreview").src = selectedBase64Image;
             document.getElementById("imageFileName").innerText = file.name;
             document.getElementById("imagePreviewContainer").classList.remove("hidden");
@@ -159,14 +159,94 @@
       document.getElementById("imagePreviewContainer").classList.add("hidden");
     }
 
+    const MIN_BRANDS = 6;
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    const baht = n => "฿" + Number(n).toLocaleString("en-US");
+    // รูปบนการ์ดใช้ขนาดย่อจาก CDN ที่รองรับ → หน้าเว็บโหลดเร็วขึ้น
+    const displayImg = u => (u && /image\.uniqlo\.com|cdn\.shopify\.com|\/cdn\/shop\//i.test(u) && !/[?&]width=/.test(u))
+      ? u + (u.includes("?") ? "&" : "?") + "width=600" : u;
+
+    let searchSeq = 0; // กันผลของการค้นหาเก่าทับการค้นหาใหม่
+
+    async function callApi(payload) {
+      const response = await fetch(GAS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const raw = await response.text();
+      let result;
+      try { result = JSON.parse(raw); }
+      catch (e) {
+        const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ")
+                       .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
+        throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + response.status + "): " + (txt || "ไม่มีข้อความ") +
+          " — ให้เปิด Apps Script → Executions เพื่อดู error จริง หรือตรวจว่า Deploy เป็น New version และตั้ง Who has access = Anyone แล้ว");
+      }
+      if (result.status !== "success") throw new Error(result.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
+      return result;
+    }
+
+    function cardHtml(item) {
+      const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
+      const scoreColor = item.matchScore >= 80 ? "bg-emerald-500" : item.matchScore >= 60 ? "bg-amber-500" : "bg-slate-400";
+      const oldPrice = item.compareAt ? `<span class="text-sm text-slate-400 line-through ml-2">${baht(item.compareAt)}</span>
+          <span class="text-xs font-bold text-rose-600 ml-1">-${item.discountPct}%</span>` : "";
+      const promo = item.promoName ? esc(item.promoName) : (item.compareAt ? "ลดราคาจากราคาปกติ" : "ไม่พบโปรโมชั่นเฉพาะรุ่น");
+      return `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+          <div>
+            <div class="relative w-full h-64 bg-slate-100 overflow-hidden border-b border-slate-100">
+              <img src="${esc(displayImg(item.imageUrl))}" alt="${esc(item.title)}" referrerpolicy="no-referrer" loading="lazy"
+                   class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+                   onerror="this.onerror=null;this.src='${fallbackImg}';">
+              <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 px-3 py-1 rounded-lg shadow-sm border border-slate-200">${esc(item.brand)}</span>
+              <span class="absolute top-3 right-3 ${scoreColor} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">ใกล้เคียง ${item.matchScore}%</span>
+              ${item.imageScore != null ? `<span class="absolute bottom-3 right-3 bg-white/90 text-slate-700 text-[11px] font-semibold px-2 py-0.5 rounded-lg border border-slate-200">🖼 รูป ${item.imageScore}% · 📝 รายละเอียด ${item.textScore ?? "-"}%</span>` : ""}
+            </div>
+            <div class="p-5 space-y-3">
+              <h4 class="font-bold text-slate-900 text-base leading-snug">${esc(item.title)}</h4>
+              <p class="text-xs text-slate-500">รหัส: ${esc(item.code || "-")}</p>
+              <div class="text-lg font-bold text-slate-800">${esc(item.priceText)}${oldPrice}</div>
+              <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60">⭐ ${promo}</div>
+              <p class="text-xs text-slate-700"><b>เหมือน:</b> ${esc(item.similar)}</p>
+              <p class="text-xs text-slate-700"><b>ต่าง:</b> ${esc(item.different)}</p>
+            </div>
+          </div>
+          <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-400">ข้อมูลจาก ${esc(item.source)}</span>
+            <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:underline">ดูหน้าสินค้า →</a>
+          </div>
+        </div>`;
+    }
+
+    function render(items, warnings, loadingMore) {
+      const grid = document.getElementById("comparisonGrid");
+      const sorted = items.slice().sort((a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0));
+      document.getElementById("resultCount").innerText =
+        `พบ ${sorted.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)` + (loadingMore ? " · กำลังค้นเพิ่ม…" : "");
+      const more = loadingMore ? `
+        <div class="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl p-3">
+          <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          กำลังค้นเว็บหาแบรนด์เพิ่มเติม (Sabina, Jintana, Guy Laroche, Sister Hood, Anny, Munafie ฯลฯ) ผลจะเพิ่มเข้ามาอัตโนมัติ
+        </div>` : "";
+      const warn = warnings.length ? `
+        <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
+          ${warnings.map(w => "⚠️ " + esc(w)).join("<br>")}
+        </div>` : "";
+      const empty = (!sorted.length && !loadingMore)
+        ? `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่ยืนยันได้จากเว็บแบรนด์</div>` : "";
+      grid.innerHTML = sorted.map(cardHtml).join("") + empty + more + warn;
+    }
+
     async function executeRealSearch() {
       const typed = document.getElementById("searchInput").value.trim();
       // มีรูปแต่ไม่พิมพ์ → ส่งข้อความว่าง ให้ระบบใช้รูปเป็นหลัก (ไม่เติมคำให้เอง)
       const textQuery = typed || (selectedBase64Image ? "" : "ชุดชั้นใน Seamless");
       const section = document.getElementById("comparisonSection");
       const grid = document.getElementById("comparisonGrid");
-      const countLabel = document.getElementById("resultCount");
       const keywordLabel = document.getElementById("searchKeywordLabel");
+      const seq = ++searchSeq;
 
       if (!GAS_API_URL || GAS_API_URL.includes("YOUR_DEPLOYMENT_ID")) {
         alert("กรุณาใส่ Web App URL จาก Google Apps Script ในตัวแปร GAS_API_URL ก่อนใช้งานนะครับ");
@@ -174,115 +254,66 @@
       }
 
       section.classList.remove("hidden");
-      
-      if (selectedBase64Image) {
-        keywordLabel.innerText = textQuery ? `ค้นหาด้วยรูปภาพ (หลัก) + คำค้นหา: "${textQuery}"` : "ค้นหาด้วยรูปภาพ";
-      } else {
-        keywordLabel.innerText = `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
-      }
-
+      keywordLabel.innerText = selectedBase64Image
+        ? (textQuery ? `ค้นหาด้วยรูปภาพ (หลัก) + คำค้นหา: "${textQuery}"` : "ค้นหาด้วยรูปภาพ")
+        : `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
+      document.getElementById("resultCount").innerText = "กำลังค้นหา…";
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">กำลังดึงแคตตาล็อกจากเว็บแบรนด์และให้ Gemini เทียบรูป... (ครั้งแรกอาจใช้ 30–90 วินาที)</p>
-        </div>
-      `;
+          <p class="text-slate-600 font-medium text-sm">รอบที่ 1: วิเคราะห์สินค้าและเทียบกับแคตตาล็อก Triumph / Uniqlo / Wienna / BSC…</p>
+        </div>`;
 
+      const t0 = Date.now();
+      const base = { query: textQuery, image: selectedBase64Image };
+      let items = [], warnings = [];
+
+      // ---------- รอบที่ 1: เร็ว ----------
+      let ref = null;
       try {
-        let response;
-        
-        if (selectedBase64Image) {
-          response = await fetch(GAS_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              query: textQuery,
-              image: selectedBase64Image
-            })
-          });
-        } else {
-          response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(textQuery)}`);
-        }
-
-        // อ่านเป็นข้อความก่อน: ถ้า Apps Script ตอบเป็นหน้า HTML (error/เกินเวลา) จะได้แสดงสาเหตุจริง
-        const raw = await response.text();
-        let result;
-        try { result = JSON.parse(raw); }
-        catch (e) {
-          const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ")
-                         .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
-          throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + response.status + "): " + (txt || "ไม่มีข้อความ") +
-            " — ให้เปิด Apps Script → Executions เพื่อดู error จริง หรือตรวจว่า Deploy เป็น New version และตั้ง Who has access = Anyone แล้ว");
-        }
-
-        if (result.status !== "success") {
-          throw new Error(result.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
-        }
-
-        const items = result.data || [];
-        grid.innerHTML = "";
-        countLabel.innerText = `พบ ${items.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)`;
-
-        if (result.reference) {
-          const r = result.reference;
-          keywordLabel.innerText = `สินค้าอ้างอิง: ${r.summary || textQuery}` +
-            (r.features && r.features.length ? ` · ${r.features.join(" · ")}` : "");
-        }
-
-        const warn = (result.warnings || []).length
-          ? `<div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
-               ${result.warnings.map(w => "⚠️ " + String(w).replace(/</g, "&lt;")).join("<br>")}
-             </div>` : "";
-
-        if (items.length === 0) {
-          grid.innerHTML = warn + `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่ยืนยันได้จากเว็บแบรนด์</div>`;
-          return;
-        }
-
-        const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-        const baht = n => "฿" + Number(n).toLocaleString("en-US");
-
-        grid.innerHTML = items.map(item => {
-          const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
-          const scoreColor = item.matchScore >= 80 ? "bg-emerald-500" : item.matchScore >= 60 ? "bg-amber-500" : "bg-slate-400";
-          const oldPrice = item.compareAt ? `<span class="text-sm text-slate-400 line-through ml-2">${baht(item.compareAt)}</span>
-              <span class="text-xs font-bold text-rose-600 ml-1">-${item.discountPct}%</span>` : "";
-          const promo = item.promoName ? esc(item.promoName) : (item.compareAt ? "ลดราคาจากราคาปกติ" : "ไม่พบโปรโมชั่นเฉพาะรุ่น");
-          return `
-            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-              <div>
-                <div class="relative w-full h-64 bg-slate-100 overflow-hidden border-b border-slate-100">
-                  <img src="${esc(item.imageUrl)}" alt="${esc(item.title)}" referrerpolicy="no-referrer" loading="lazy"
-                       class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
-                       onerror="this.onerror=null;this.src='${fallbackImg}';">
-                  <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 px-3 py-1 rounded-lg shadow-sm border border-slate-200">${esc(item.brand)}</span>
-                  <span class="absolute top-3 right-3 ${scoreColor} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">ใกล้เคียง ${item.matchScore}%</span>
-                </div>
-                <div class="p-5 space-y-3">
-                  <h4 class="font-bold text-slate-900 text-base leading-snug">${esc(item.title)}</h4>
-                  <p class="text-xs text-slate-500">รหัส: ${esc(item.code || "-")}</p>
-                  <div class="text-lg font-bold text-slate-800">${esc(item.priceText)}${oldPrice}</div>
-                  <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60">⭐ ${promo}</div>
-                  <p class="text-xs text-slate-700"><b>เหมือน:</b> ${esc(item.similar)}</p>
-                  <p class="text-xs text-slate-700"><b>ต่าง:</b> ${esc(item.different)}</p>
-                </div>
-              </div>
-              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-400">ข้อมูลจาก ${esc(item.source)}</span>
-                <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:underline">ดูหน้าสินค้า →</a>
-              </div>
-            </div>`;
-        }).join("") + warn;
-
+        const r1 = await callApi(Object.assign({ phase: "fast" }, base));
+        if (seq !== searchSeq) return;
+        ref = r1.reference;
+        if (ref) keywordLabel.innerText = `สินค้าอ้างอิง: ${ref.summary || textQuery}` +
+          (ref.features && ref.features.length ? ` · ${ref.features.join(" · ")}` : "");
+        items = r1.data || [];
+        warnings = (r1.warnings || []).slice();
+        render(items, warnings, true);
+        console.log("รอบที่ 1 ใช้เวลา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที");
       } catch (error) {
+        if (seq !== searchSeq) return;
         console.error("Search error:", error);
         grid.innerHTML = `
           <div class="col-span-1 md:col-span-3 text-center py-10 bg-rose-50 text-rose-700 rounded-2xl border border-rose-200 p-4">
             <p class="font-bold">เกิดข้อผิดพลาดในการค้นหา</p>
-            <p class="text-xs mt-1">${error.message}</p>
-          </div>
-        `;
+            <p class="text-xs mt-1">${esc(error.message)}</p>
+          </div>`;
+        document.getElementById("resultCount").innerText = "พบ 0 รายการ";
+        return;
       }
+
+      // ---------- รอบที่ 2: ค้นเว็บหาแบรนด์เพิ่ม (ใช้ ref เดิม ไม่ต้องวิเคราะห์ซ้ำ) ----------
+      try {
+        const r2 = await callApi(Object.assign({ phase: "extra", ref: ref }, base));
+        if (seq !== searchSeq) return;
+        const have = new Set(items.map(x => x.brand));
+        (r2.data || []).forEach(x => { if (!have.has(x.brand)) items.push(x); });
+        warnings = warnings.concat(r2.warnings || []);
+      } catch (error) {
+        if (seq !== searchSeq) return;
+        warnings.push("ค้นแบรนด์เพิ่มเติมไม่สำเร็จ: " + error.message);
+      }
+      // รวมรายการ "ไม่พบข้อมูลจาก ..." ของ 2 รอบเป็นบรรทัดเดียว
+      const missing = [];
+      warnings = warnings.filter(w => {
+        const m = String(w).match(/^ไม่พบข้อมูลที่ยืนยันได้จาก: (.*)$/);
+        if (m) { missing.push(...m[1].split(", ")); return false; }
+        return true;
+      });
+      if (missing.length) warnings.push("ไม่พบข้อมูลที่ยืนยันได้จาก: " + missing.join(", "));
+      if (items.length < MIN_BRANDS) warnings.unshift(`พบสินค้าที่ยืนยันได้ ${items.length} แบรนด์ (เป้าหมาย ${MIN_BRANDS})`);
+      render(items, warnings, false);
+      console.log("รวมทั้งหมดใช้เวลา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที");
     }
   </script>
 </body>
