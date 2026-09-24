@@ -21,7 +21,7 @@
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Product Intelligence System</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">ค้นหาและเปรียบเทียบรูปภาพสินค้าจริงด้วย Gemini AI + Google Search</p>
+          <p class="text-xs text-slate-500 hidden sm:block">ดึงสินค้าจริงจากเว็บแบรนด์ แล้วให้ Gemini เทียบจากรูป</p>
         </div>
       </div>
       <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -94,7 +94,7 @@
     <section id="comparisonSection" class="space-y-5 hidden">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลการวิเคราะห์เปรียบเทียบจาก AI + Google Images</h2>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลเปรียบเทียบสินค้าคู่แข่ง (ข้อมูลจริงจากเว็บแบรนด์)</h2>
           <p class="text-xs text-slate-500 mt-0.5" id="searchKeywordLabel">ผลลัพธ์การค้นหา</p>
         </div>
         <span id="resultCount" class="text-xs font-semibold bg-slate-200/80 text-slate-700 px-3 py-1 rounded-full">พบ 0 รายการ</span>
@@ -160,7 +160,9 @@
     }
 
     async function executeRealSearch() {
-      const textQuery = document.getElementById("searchInput").value.trim() || "ชุดชั้นใน Seamless";
+      const typed = document.getElementById("searchInput").value.trim();
+      // มีรูปแต่ไม่พิมพ์ → ส่งข้อความว่าง ให้ระบบใช้รูปเป็นหลัก (ไม่เติมคำให้เอง)
+      const textQuery = typed || (selectedBase64Image ? "" : "ชุดชั้นใน Seamless");
       const section = document.getElementById("comparisonSection");
       const grid = document.getElementById("comparisonGrid");
       const countLabel = document.getElementById("resultCount");
@@ -174,7 +176,7 @@
       section.classList.remove("hidden");
       
       if (selectedBase64Image) {
-        keywordLabel.innerText = `ค้นหาด้วยรูปภาพ + คำค้นหา: "${textQuery}"`;
+        keywordLabel.innerText = textQuery ? `ค้นหาด้วยรูปภาพ (หลัก) + คำค้นหา: "${textQuery}"` : "ค้นหาด้วยรูปภาพ";
       } else {
         keywordLabel.innerText = `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
       }
@@ -182,7 +184,7 @@
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">กำลังวิเคราะห์ข้อมูลด้วย Gemini AI และดึงรูปภาพสินค้าจริงจาก Google...</p>
+          <p class="text-slate-600 font-medium text-sm">กำลังดึงแคตตาล็อกจากเว็บแบรนด์และให้ Gemini เทียบรูป... (ครั้งแรกอาจใช้ 30–90 วินาที)</p>
         </div>
       `;
 
@@ -202,70 +204,75 @@
           response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(textQuery)}`);
         }
 
-        const result = await response.json();
+        // อ่านเป็นข้อความก่อน: ถ้า Apps Script ตอบเป็นหน้า HTML (error/เกินเวลา) จะได้แสดงสาเหตุจริง
+        const raw = await response.text();
+        let result;
+        try { result = JSON.parse(raw); }
+        catch (e) {
+          const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ")
+                         .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
+          throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + response.status + "): " + (txt || "ไม่มีข้อความ") +
+            " — ให้เปิด Apps Script → Executions เพื่อดู error จริง หรือตรวจว่า Deploy เป็น New version และตั้ง Who has access = Anyone แล้ว");
+        }
 
         if (result.status !== "success") {
           throw new Error(result.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
         }
 
-        const items = result.data;
+        const items = result.data || [];
         grid.innerHTML = "";
-        countLabel.innerText = `พบ ${items.length} รายการ`;
+        countLabel.innerText = `พบ ${items.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)`;
+
+        if (result.reference) {
+          const r = result.reference;
+          keywordLabel.innerText = `สินค้าอ้างอิง: ${r.summary || textQuery}` +
+            (r.features && r.features.length ? ` · ${r.features.join(" · ")}` : "");
+        }
+
+        const warn = (result.warnings || []).length
+          ? `<div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
+               ${result.warnings.map(w => "⚠️ " + String(w).replace(/</g, "&lt;")).join("<br>")}
+             </div>` : "";
 
         if (items.length === 0) {
-          grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่เกี่ยวข้อง</div>`;
+          grid.innerHTML = warn + `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่ยืนยันได้จากเว็บแบรนด์</div>`;
           return;
         }
 
-        items.forEach(item => {
-          const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
+        const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+        const baht = n => "฿" + Number(n).toLocaleString("en-US");
 
-          const cardHtml = `
+        grid.innerHTML = items.map(item => {
+          const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
+          const scoreColor = item.matchScore >= 80 ? "bg-emerald-500" : item.matchScore >= 60 ? "bg-amber-500" : "bg-slate-400";
+          const oldPrice = item.compareAt ? `<span class="text-sm text-slate-400 line-through ml-2">${baht(item.compareAt)}</span>
+              <span class="text-xs font-bold text-rose-600 ml-1">-${item.discountPct}%</span>` : "";
+          const promo = item.promoName ? esc(item.promoName) : (item.compareAt ? "ลดราคาจากราคาปกติ" : "ไม่พบโปรโมชั่นเฉพาะรุ่น");
+          return `
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <!-- รูปภาพสินค้าจริงจาก Google Search -->
-                <div class="relative w-full h-56 bg-slate-100 overflow-hidden border-b border-slate-100">
-                  <img 
-                    src="${item.imageUrl}" 
-                    alt="${item.title}" 
-                    class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300" 
-                    onError="this.onerror=null;this.src='${fallbackImg}';"
-                  >
-                  <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm border border-slate-200">
-                    ${item.brand}
-                  </span>
-                  <span class="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
-                    ${item.matchScore || 'N/A'}
-                  </span>
+                <div class="relative w-full h-64 bg-slate-100 overflow-hidden border-b border-slate-100">
+                  <img src="${esc(item.imageUrl)}" alt="${esc(item.title)}" referrerpolicy="no-referrer" loading="lazy"
+                       class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
+                       onerror="this.onerror=null;this.src='${fallbackImg}';">
+                  <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 px-3 py-1 rounded-lg shadow-sm border border-slate-200">${esc(item.brand)}</span>
+                  <span class="absolute top-3 right-3 ${scoreColor} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">ใกล้เคียง ${item.matchScore}%</span>
                 </div>
-
                 <div class="p-5 space-y-3">
-                  <h4 class="font-bold text-slate-900 text-base leading-snug">
-                    ${item.title}
-                  </h4>
-                  
-                  <div class="text-lg font-bold text-slate-800">
-                    💰 ${item.price}
-                  </div>
-
-                  <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60 flex items-start gap-1.5">
-                    <span class="flex-shrink-0">⭐</span>
-                    <span>${item.promo}</span>
-                  </div>
-
-                  <p class="text-xs text-slate-600 leading-relaxed pt-1">
-                    ${item.details}
-                  </p>
+                  <h4 class="font-bold text-slate-900 text-base leading-snug">${esc(item.title)}</h4>
+                  <p class="text-xs text-slate-500">รหัส: ${esc(item.code || "-")}</p>
+                  <div class="text-lg font-bold text-slate-800">${esc(item.priceText)}${oldPrice}</div>
+                  <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60">⭐ ${promo}</div>
+                  <p class="text-xs text-slate-700"><b>เหมือน:</b> ${esc(item.similar)}</p>
+                  <p class="text-xs text-slate-700"><b>ต่าง:</b> ${esc(item.different)}</p>
                 </div>
               </div>
-
-              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 text-right">
-                <span class="text-xs font-medium text-slate-400">ดึงรูปภาพจริงผ่าน Google Search API</span>
+              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-xs text-slate-400">ข้อมูลจาก ${esc(item.source)}</span>
+                <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:underline">ดูหน้าสินค้า →</a>
               </div>
-            </div>
-          `;
-          grid.innerHTML += cardHtml;
-        });
+            </div>`;
+        }).join("") + warn;
 
       } catch (error) {
         console.error("Search error:", error);
