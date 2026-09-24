@@ -21,7 +21,7 @@
         </div>
         <div>
           <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Product Intelligence System</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">ค้นหาและเปรียบเทียบสินค้าคู่แข่งด้วย Gemini AI</p>
+          <p class="text-xs text-slate-500 hidden sm:block">ค้นหาและเปรียบเทียบรูปภาพสินค้าจริงด้วย Gemini AI + Google Search</p>
         </div>
       </div>
       <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -50,14 +50,12 @@
           <div class="relative flex items-center">
             <input type="text" id="searchInput" placeholder="เช่น Wacoal Wireless Bra บราไร้โครง รุ่น WB3A14" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
             
-            <!-- ปุ่มอัปโหลดรูปภาพ -->
             <label for="imageUpload" class="absolute right-2 p-1.5 bg-slate-200/60 hover:bg-slate-300 text-slate-600 rounded-lg cursor-pointer transition-all" title="อัปโหลดรูปภาพเพื่อค้นหา">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </label>
             <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
           </div>
 
-          <!-- กล่องตัวอย่างรูปภาพที่อัปโหลด -->
           <div id="imagePreviewContainer" class="hidden flex items-center justify-between bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
             <div class="flex items-center space-x-3">
               <img id="imagePreview" src="" alt="Selected Preview" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
@@ -96,13 +94,12 @@
     <section id="comparisonSection" class="space-y-5 hidden">
       <div class="flex items-center justify-between border-b border-slate-200 pb-3">
         <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลการวิเคราะห์เปรียบเทียบจาก AI</h2>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลการวิเคราะห์เปรียบเทียบจาก AI + Google Images</h2>
           <p class="text-xs text-slate-500 mt-0.5" id="searchKeywordLabel">ผลลัพธ์การค้นหา</p>
         </div>
         <span id="resultCount" class="text-xs font-semibold bg-slate-200/80 text-slate-700 px-3 py-1 rounded-full">พบ 0 รายการ</span>
       </div>
 
-      <!-- Grid แสดงการ์ด -->
       <div id="comparisonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Cards will be populated here -->
       </div>
@@ -111,8 +108,8 @@
   </main>
 
   <script>
-    // ⚠️ นำ Web App URL จาก Google Apps Script (Exec URL) มาวางแทนที่ตรงนี้
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec";
+    // ⚠️ นำ Web App URL จาก Google Apps Script มาวางแทนที่ตรงนี้
+    const GAS_API_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
 
     let selectedBase64Image = null;
 
@@ -123,7 +120,6 @@
       }
     }
 
-    // ย่อขนาดรูปภาพก่อนส่งเพื่อป้องกัน Failed to fetch
     function handleImageSelect(event) {
       const file = event.target.files[0];
       if (file) {
@@ -146,7 +142,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // บีบอัดเป็น JPEG ความละเอียด 0.7
             selectedBase64Image = canvas.toDataURL('image/jpeg', 0.7);
             document.getElementById("imagePreview").src = selectedBase64Image;
             document.getElementById("imageFileName").innerText = file.name;
@@ -187,7 +182,7 @@
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">ระบบกำลังวิเคราะห์รูปภาพและเรนเดอร์ข้อมูลด้วย Gemini Vision...</p>
+          <p class="text-slate-600 font-medium text-sm">กำลังวิเคราะห์ข้อมูลด้วย Gemini AI และดึงรูปภาพสินค้าจริงจาก Google...</p>
         </div>
       `;
 
@@ -223,18 +218,17 @@
         }
 
         items.forEach(item => {
-          // รูปภาพสำรองกรณีเครือข่ายบล็อก
           const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
 
           const cardHtml = `
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
               <div>
-                <!-- ส่วนรูปภาพสินค้าแบบ Dynamic -->
-                <div class="relative w-full h-52 bg-slate-100 overflow-hidden border-b border-slate-100">
+                <!-- รูปภาพสินค้าจริงจาก Google Search -->
+                <div class="relative w-full h-56 bg-slate-100 overflow-hidden border-b border-slate-100">
                   <img 
                     src="${item.imageUrl}" 
                     alt="${item.title}" 
-                    class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+                    class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300" 
                     onError="this.onerror=null;this.src='${fallbackImg}';"
                   >
                   <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm border border-slate-200">
@@ -266,7 +260,7 @@
               </div>
 
               <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 text-right">
-                <span class="text-xs font-medium text-slate-400">วิเคราะห์ข้อมูลผ่าน Gemini Vision</span>
+                <span class="text-xs font-medium text-slate-400">ดึงรูปภาพจริงผ่าน Google Search API</span>
               </div>
             </div>
           `;
