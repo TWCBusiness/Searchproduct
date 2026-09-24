@@ -3,278 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Intelligence System - ระบบเปรียบเทียบสินค้า</title>
+  <title>ระบบค้นหาและเปรียบเทียบสินค้า</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts Prompt -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Sarabun', sans-serif; }
+    body {
+      font-family: 'Prompt', sans-serif;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 min-h-screen text-slate-800">
 
   <!-- Header -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-500/20">
-          VS
+        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-md shadow-blue-200">
+          🔍
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Product Intelligence System</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">ค้นหาและเปรียบเทียบรูปภาพสินค้าจริงจากเว็บต่างแบรนด์</p>
+          <h1 class="font-bold text-lg text-slate-900 leading-tight">ระบบเปรียบเทียบสินค้า</h1>
+          <p class="text-xs text-slate-500">วิเคราะห์ข้อมูลอัตโนมัติด้วย Gemini Vision</p>
         </div>
       </div>
-      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-        ค้นหาข้อมูลจริงผ่าน API
-      </span>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- Main Content Container -->
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
 
-    <!-- Search Section -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7">
-      <div class="border-b border-slate-100 pb-4 mb-6">
-        <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          ระบุคำค้นหา หรือ อัปโหลดรูปภาพเพื่อค้นหา
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <!-- Input Text & Image Upload -->
-        <div class="space-y-3">
-          <label class="block text-xs font-semibold text-slate-700">พิมพ์ชื่อสินค้า / คุณลักษณะที่ต้องการค้นหา</label>
-          <div class="relative flex items-center">
-            <input type="text" id="searchInput" placeholder="เช่น Wacoal Wireless Bra บราไร้โครง รุ่น WB3A14" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            
-            <!-- ปุ่มอัปโหลดรูปภาพ (Image Search Button) -->
-            <label for="imageUpload" class="absolute right-2 p-1.5 bg-slate-200/60 hover:bg-slate-300 text-slate-600 rounded-lg cursor-pointer transition-all" title="อัปโหลดรูปภาพเพื่อค้นหา">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </label>
-            <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+    <!-- Search / Filter Card -->
+    <section class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+      <form id="searchForm" class="space-y-4">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label for="searchInput" class="block text-sm font-semibold text-slate-700 mb-1">คำค้นหา หรือชื่อรุ่นสินค้า</label>
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="เช่น Wacoal Wireless Bra บราไร้โครง รุ่น WB3A14"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+            >
           </div>
-
-          <!-- กล่องตัวอย่างรูปภาพที่อัปโหลด (Image Preview Box) -->
-          <div id="imagePreviewContainer" class="hidden flex items-center justify-between bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
-            <div class="flex items-center space-x-3">
-              <img id="imagePreview" src="" alt="Selected Preview" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
-              <div>
-                <p id="imageFileName" class="text-xs font-semibold text-slate-800 truncate max-w-[180px] sm:max-w-[250px]">filename.jpg</p>
-                <p class="text-[10px] text-blue-600 font-medium">แนบรูปภาพแล้ว (ระบบจะค้นหาด้วยรูปภาพนี้)</p>
-              </div>
-            </div>
-            <button onclick="removeSelectedImage()" class="p-1 hover:bg-blue-100 text-slate-400 hover:text-rose-500 rounded-lg transition-all" title="ยกเลิกรูปนี้">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <div class="w-full md:w-auto flex items-end">
+            <button 
+              type="submit" 
+              id="searchBtn"
+              class="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-md shadow-blue-200 transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <span>🔍 ค้นหาและเปรียบเทียบ</span>
             </button>
           </div>
         </div>
 
-        <!-- Preset Categories -->
-        <div class="space-y-3">
-          <label class="block text-xs font-semibold text-slate-700">หรือ เลือกหมวดหมู่สำเร็จรูป</label>
-          <select id="categorySelect" onchange="applyCategory()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
-            <option value="">-- เลือกจากหมวดหมู่ --</option>
-            <option value="บราไร้โครง Wireless Bra">บราไร้โครง Wireless Bra</option>
-            <option value="ชุดชั้นในกระชับสัดส่วน Seamless">ชุดชั้นในกระชับสัดส่วน Seamless</option>
-            <option value="สปอร์ตบราผ้าระบายอากาศ">สปอร์ตบราผ้าระบายอากาศ</option>
-          </select>
+        <!-- Image Upload Section -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">แนบรูปภาพสินค้า (Optional)</label>
+          <input 
+            type="file" 
+            id="imageInput" 
+            accept="image/*"
+            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+          >
         </div>
-      </div>
-
-      <div class="mt-6 flex justify-end">
-        <button onclick="executeRealSearch()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          ค้นหา & ดึงรูปภาพสินค้าจริง
-        </button>
-      </div>
+      </form>
     </section>
 
+    <!-- Status / Loading Banner -->
+    <div id="statusMessage" class="hidden text-center py-8">
+      <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-blue-50 text-blue-700 font-medium text-sm">
+        <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>กำลังวิเคราะห์และค้นหาข้อมูลเปรียบเทียบจากเว็บออนไลน์จริง...</span>
+      </div>
+    </div>
+
     <!-- Results Section -->
-    <section id="comparisonSection" class="space-y-5 hidden">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-        <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลการเปรียบเทียบจากเว็บออนไลน์จริง</h2>
-          <p class="text-xs text-slate-500 mt-0.5" id="searchKeywordLabel">ผลลัพธ์การค้นหา</p>
-        </div>
-        <span id="resultCount" class="text-xs font-semibold bg-slate-200/80 text-slate-700 px-3 py-1 rounded-full">พบ 0 รายการ</span>
+    <section>
+      <div id="resultHeader" class="hidden flex items-center justify-between mb-6">
+        <h2 class="font-bold text-xl text-slate-900">ผลการเปรียบเทียบจากเว็บออนไลน์จริง</h2>
+        <span id="resultCount" class="bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1 rounded-full">
+          พบ 0 รายการ
+        </span>
       </div>
 
-      <!-- Grid แสดงการ์ด -->
-      <div id="comparisonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Cards will be populated here -->
+      <!-- Results Grid -->
+      <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- JS จะสร้างการ์ดสินค้าตรงนี้ -->
       </div>
     </section>
 
   </main>
 
+  <!-- JavaScript -->
   <script>
-    // ⚠️ วาง Web App URL ที่ได้จาก Google Apps Script
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec";
+    // ** ใส่ URL ของ Google Apps Script Web App ของคุณที่นี่ **
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec"; 
 
-    let selectedBase64Image = null;
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const imageInput = document.getElementById('imageInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const resultHeader = document.getElementById('resultHeader');
+    const resultCount = document.getElementById('resultCount');
+    const resultsGrid = document.getElementById('resultsGrid');
 
-    // เลือกหมวดหมู่สำเร็จรูป
-    function applyCategory() {
-      const selected = document.getElementById("categorySelect").value;
-      if (selected) {
-        document.getElementById("searchInput").value = selected;
-      }
-    }
+    searchForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      const file = imageInput.files[0];
 
-// ย่อขนาดรูปภาพก่อนแปลงเป็น Base64 เพื่อป้องกัน Failed to fetch
-    function handleImageSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 800; // จำกัดความกว้างสูงสุด 800px
-            const scaleSize = MAX_WIDTH / img.width;
-            
-            if (scaleSize < 1) {
-              canvas.width = MAX_WIDTH;
-              canvas.height = img.height * scaleSize;
-            } else {
-              canvas.width = img.width;
-              canvas.height = img.height;
-            }
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            // บีบอัดรูปภาพเป็น JPEG คุณภาพ 0.7
-            selectedBase64Image = canvas.toDataURL('image/jpeg', 0.7);
-            document.getElementById("imagePreview").src = selectedBase64Image;
-            document.getElementById("imageFileName").innerText = file.name;
-            document.getElementById("imagePreviewContainer").classList.remove("hidden");
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // ลบรูปภาพที่เลือกไว้
-    function removeSelectedImage() {
-      selectedBase64Image = null;
-      document.getElementById("imageUpload").value = "";
-      document.getElementById("imagePreviewContainer").classList.add("hidden");
-    }
-
-async function executeRealSearch() {
-      const textQuery = document.getElementById("searchInput").value.trim() || "ชุดชั้นใน Seamless";
-      const section = document.getElementById("comparisonSection");
-      const grid = document.getElementById("comparisonGrid");
-      const countLabel = document.getElementById("resultCount");
-      const keywordLabel = document.getElementById("searchKeywordLabel");
-
-      if (!GAS_API_URL || GAS_API_URL.includes("วาง_WEB_APP_URL")) {
-        alert("กรุณาใส่ GAS_API_URL ในไฟล์ index.html ก่อนใช้งานนะครับ");
+      if (!query && !file) {
+        alert('กรุณากรอกคำค้นหาหรือเลือกรูปภาพสินค้าอย่างใดอย่างหนึ่ง');
         return;
       }
 
-      section.classList.remove("hidden");
-      
-      if (selectedBase64Image) {
-        keywordLabel.innerText = `ค้นหาด้วยรูปภาพ + คำค้นหา: "${textQuery}"`;
-      } else {
-        keywordLabel.innerText = `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
-      }
-
-      grid.innerHTML = `
-        <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
-          <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">ระบบกำลังวิเคราะห์รูปภาพและข้อมูลด้วย Claude Vision API...</p>
-        </div>
-      `;
+      showLoading(true);
 
       try {
-        let response;
-        
-        if (selectedBase64Image) {
-          // ส่ง POST โดยใช้ Content-Type: text/plain เพื่อข้าม CORS Preflight
-          response = await fetch(GAS_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              query: textQuery,
-              image: selectedBase64Image
-            })
-          });
-        } else {
-          response = await fetch(`${GAS_API_URL}?query=${encodeURIComponent(textQuery)}`);
+        let base64Image = null;
+        if (file) {
+          base64Image = await convertFileToBase64(file);
         }
 
-        const result = await response.json();
+        const payload = {
+          query: query,
+          image: base64Image
+        };
 
-        if (result.status !== "success") {
-          throw new Error(result.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
-        }
-
-        const items = result.data;
-        grid.innerHTML = "";
-        countLabel.innerText = `พบ ${items.length} รายการ`;
-
-        if (items.length === 0) {
-          grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่เกี่ยวข้อง</div>`;
-          return;
-        }
-
-        items.forEach(item => {
-          const cardHtml = `
-            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-              <div>
-                <div class="p-5 bg-gradient-to-br from-slate-50 to-indigo-50/30 border-b border-slate-100 flex items-center justify-between">
-                  <span class="text-sm font-bold text-blue-600 uppercase tracking-wider bg-blue-100/60 px-3 py-1 rounded-lg">
-                    ${item.brand}
-                  </span>
-                  <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">
-                    ${item.matchScore}
-                  </span>
-                </div>
-
-                <div class="p-5 space-y-3">
-                  <h4 class="font-bold text-slate-900 text-base leading-snug">
-                    ${item.title}
-                  </h4>
-                  
-                  <div class="text-lg font-bold text-slate-800">
-                    💰 ${item.price}
-                  </div>
-
-                  <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60 flex items-start gap-1.5">
-                    <span class="flex-shrink-0">⭐</span>
-                    <span>${item.promo}</span>
-                  </div>
-
-                  <p class="text-xs text-slate-600 leading-relaxed pt-1">
-                    ${item.details}
-                  </p>
-                </div>
-              </div>
-
-              <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 text-right">
-                <span class="text-xs font-medium text-slate-400">วิเคราะห์ข้อมูลผ่าน Claude Vision</span>
-              </div>
-            </div>
-          `;
-          grid.innerHTML += cardHtml;
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
         });
 
-      } catch (error) {
-        console.error("Search error:", error);
-        grid.innerHTML = `
-          <div class="col-span-1 md:col-span-3 text-center py-10 bg-rose-50 text-rose-700 rounded-2xl border border-rose-200 p-4">
-            <p class="font-bold">เกิดข้อผิดพลาดในการค้นหา</p>
-            <p class="text-xs mt-1">${error.message}</p>
+        const resData = await response.json();
+
+        if (resData.status === 'success') {
+          renderResults(resData.data);
+        } else {
+          alert('เกิดข้อผิดพลาดจากระบบ: ' + resData.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+      } finally {
+        showLoading(false);
+      }
+    });
+
+    function convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function showLoading(isLoading) {
+      if (isLoading) {
+        statusMessage.classList.remove('hidden');
+        searchBtn.disabled = true;
+        searchBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        statusMessage.classList.add('hidden');
+        searchBtn.disabled = false;
+        searchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    function renderResults(items) {
+      resultsGrid.innerHTML = '';
+      
+      if (!items || items.length === 0) {
+        resultHeader.classList.add('hidden');
+        resultsGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500">ไม่พบข้อมูลเปรียบเทียบ</div>`;
+        return;
+      }
+
+      resultHeader.classList.remove('hidden');
+      resultCount.textContent = `พบ ${items.length} รายการ`;
+
+      items.forEach(item => {
+        // รูปภาพสำรองกรณีไม่มี URL หรือโหลดรูปภาพไม่สำเร็จ
+        const defaultImage = "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=600&q=80";
+        const imgUrl = item.imageUrl || defaultImage;
+
+        const cardHtml = `
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+            <div>
+              <!-- ส่วนรูปภาพสินค้า -->
+              <div class="relative w-full h-48 bg-slate-100 overflow-hidden">
+                <img 
+                  src="${imgUrl}" 
+                  alt="${item.title}" 
+                  class="w-full h-full object-cover" 
+                  onError="this.onerror=null;this.src='${defaultImage}';"
+                >
+                <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg shadow-sm">
+                  ${item.brand}
+                </span>
+                <span class="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
+                  ${item.matchScore || 'N/A'}
+                </span>
+              </div>
+
+              <!-- รายละเอียดสินค้า -->
+              <div class="p-5 space-y-3">
+                <h4 class="font-bold text-slate-900 text-base leading-snug">
+                  ${item.title}
+                </h4>
+                
+                <div class="text-lg font-bold text-slate-800">
+                  💰 ${item.price}
+                </div>
+
+                <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60 flex items-start gap-1.5">
+                  <span class="flex-shrink-0">⭐</span>
+                  <span>${item.promo}</span>
+                </div>
+
+                <p class="text-xs text-slate-600 leading-relaxed pt-1">
+                  ${item.details}
+                </p>
+              </div>
+            </div>
+
+            <!-- Footer ของการ์ด -->
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 text-right">
+              <span class="text-xs font-medium text-slate-400">วิเคราะห์ข้อมูลผ่าน Gemini Vision</span>
+            </div>
           </div>
         `;
-      }
+        resultsGrid.innerHTML += cardHtml;
+      });
     }
   </script>
 </body>
