@@ -220,23 +220,29 @@
         </div>`;
     }
 
-    function render(items, warnings, loadingMore) {
+    function render(items, warnings, coverage) {
       const grid = document.getElementById("comparisonGrid");
       const sorted = items.slice().sort((a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0));
       document.getElementById("resultCount").innerText =
-        `พบ ${sorted.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)` + (loadingMore ? " · กำลังค้นเพิ่ม…" : "");
-      const more = loadingMore ? `
-        <div class="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl p-3">
-          <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          กำลังค้นเว็บหาแบรนด์เพิ่มเติม (Sabina, Jintana, Guy Laroche, Sister Hood, Anny, Munafie ฯลฯ) ผลจะเพิ่มเข้ามาอัตโนมัติ
+        `พบ ${sorted.length}/${(coverage || []).length || sorted.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)`;
+      const more = (coverage || []).length ? `
+        <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
+          <b>แบรนด์ที่ค้น:</b>
+          ${coverage.map(c => c.shown
+            ? `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ ${esc(c.brand)}</span>`
+            : `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200" title="ไม่พบสินค้าที่ยืนยันได้">– ${esc(c.brand)}</span>`).join("")}
         </div>` : "";
       const warn = warnings.length ? `
         <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
           ${warnings.map(w => "⚠️ " + esc(w)).join("<br>")}
         </div>` : "";
-      const empty = (!sorted.length && !loadingMore)
+      const empty = !sorted.length
         ? `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่ยืนยันได้จากเว็บแบรนด์</div>` : "";
-      grid.innerHTML = sorted.map(cardHtml).join("") + empty + more + warn;
+      grid.innerHTML = sorted.map(cardHtml).join("") + empty + more;
+      // ไม่ต้องแสดงบรรทัด "ไม่พบจาก ..." ซ้ำ เพราะมีแถบแบรนด์แล้ว
+      if (warn && warnings.some(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w)))
+        grid.innerHTML += `<div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
+          ${warnings.filter(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w)).map(w => "⚠️ " + esc(w)).join("<br>")}</div>`;
     }
 
     async function executeRealSearch() {
@@ -261,25 +267,17 @@
       grid.innerHTML = `
         <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">รอบที่ 1: วิเคราะห์สินค้าและเทียบกับแคตตาล็อก Triumph / Uniqlo / Wienna / BSC…</p>
+          <p class="text-slate-600 font-medium text-sm">กำลังวิเคราะห์รูปและค้นหาสินค้าใกล้เคียงจาก 12 แบรนด์คู่แข่ง…</p>
         </div>`;
 
       const t0 = Date.now();
-      const base = { query: textQuery, image: selectedBase64Image };
-      let items = [], warnings = [];
-
-      // ---------- รอบที่ 1: เร็ว ----------
-      let ref = null;
       try {
-        const r1 = await callApi(Object.assign({ phase: "fast" }, base));
+        const r = await callApi({ query: textQuery, image: selectedBase64Image });
         if (seq !== searchSeq) return;
-        ref = r1.reference;
+        const ref = r.reference;
         if (ref) keywordLabel.innerText = `สินค้าอ้างอิง: ${ref.summary || textQuery}` +
           (ref.features && ref.features.length ? ` · ${ref.features.join(" · ")}` : "");
-        items = r1.data || [];
-        warnings = (r1.warnings || []).slice();
-        render(items, warnings, true);
-        console.log("รอบที่ 1 ใช้เวลา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที");
+        render(r.data || [], r.warnings || [], r.coverage || []);
       } catch (error) {
         if (seq !== searchSeq) return;
         console.error("Search error:", error);
@@ -291,29 +289,7 @@
         document.getElementById("resultCount").innerText = "พบ 0 รายการ";
         return;
       }
-
-      // ---------- รอบที่ 2: ค้นเว็บหาแบรนด์เพิ่ม (ใช้ ref เดิม ไม่ต้องวิเคราะห์ซ้ำ) ----------
-      try {
-        const r2 = await callApi(Object.assign({ phase: "extra", ref: ref }, base));
-        if (seq !== searchSeq) return;
-        const have = new Set(items.map(x => x.brand));
-        (r2.data || []).forEach(x => { if (!have.has(x.brand)) items.push(x); });
-        warnings = warnings.concat(r2.warnings || []);
-      } catch (error) {
-        if (seq !== searchSeq) return;
-        warnings.push("ค้นแบรนด์เพิ่มเติมไม่สำเร็จ: " + error.message);
-      }
-      // รวมรายการ "ไม่พบข้อมูลจาก ..." ของ 2 รอบเป็นบรรทัดเดียว
-      const missing = [];
-      warnings = warnings.filter(w => {
-        const m = String(w).match(/^ไม่พบข้อมูลที่ยืนยันได้จาก: (.*)$/);
-        if (m) { missing.push(...m[1].split(", ")); return false; }
-        return true;
-      });
-      if (missing.length) warnings.push("ไม่พบข้อมูลที่ยืนยันได้จาก: " + missing.join(", "));
-      if (items.length < MIN_BRANDS) warnings.unshift(`พบสินค้าที่ยืนยันได้ ${items.length} แบรนด์ (เป้าหมาย ${MIN_BRANDS})`);
-      render(items, warnings, false);
-      console.log("รวมทั้งหมดใช้เวลา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที");
+      console.log("ใช้เวลาค้นหา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที");
     }
   </script>
 </body>
