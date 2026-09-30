@@ -3,415 +3,713 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Intelligence System - ระบบเปรียบเทียบสินค้า</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS สำเร็จรูป (สร้างล่วงหน้า ไม่ต้องให้เบราว์เซอร์ประมวลผลทุกครั้ง) -->
-  <style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.bottom-3{bottom:.75rem}.left-3{left:.75rem}.right-2{right:.5rem}.right-3{right:.75rem}.top-0{top:0}.top-2{top:.5rem}.top-3{top:.75rem}.z-30{z-index:30}.col-span-1{grid-column:span 1/span 1}.col-span-3{grid-column:span 3/span 3}.m-0\.5{margin:.125rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-3{margin-bottom:.75rem}.mb-6{margin-bottom:1.5rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mr-1\.5{margin-right:.375rem}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:.375rem}.h-10{height:2.5rem}.h-12{height:3rem}.h-4{height:1rem}.h-40{height:10rem}.h-5{height:1.25rem}.h-64{height:16rem}.h-8{height:2rem}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-1\.5{width:.375rem}.w-10{width:2.5rem}.w-12{width:3rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-full{width:100%}.max-w-7xl{max-width:80rem}.max-w-\[180px\]{max-width:180px}.flex-1{flex:1 1 0%}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}@keyframes spin{to{transform:rotate(1turn)}}.animate-spin{animation:spin 1s linear infinite}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.content-start{align-content:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.space-x-3>:not([hidden])~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(.75rem*var(--tw-space-x-reverse));margin-left:calc(.75rem*(1 - var(--tw-space-x-reverse)))}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.overflow-hidden,.truncate{overflow:hidden}.truncate{text-overflow:ellipsis;white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-md{border-radius:.375rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138/var(--tw-border-opacity,1))}.border-amber-200\/60{border-color:hsla(48,97%,77%,.6)}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254/var(--tw-border-opacity,1))}.border-blue-600{--tw-border-opacity:1;border-color:rgb(37 99 235/var(--tw-border-opacity,1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208/var(--tw-border-opacity,1))}.border-rose-200{--tw-border-opacity:1;border-color:rgb(254 205 211/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.border-t-transparent{border-top-color:transparent}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235/var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-blue-50\/70{background-color:rgba(239,246,255,.7)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-slate-200\/60{background-color:rgba(226,232,240,.6)}.bg-slate-200\/80{background-color:rgba(226,232,240,.8)}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184/var(--tw-bg-opacity,1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/80{background-color:hsla(0,0%,100%,.8)}.bg-white\/90{background-color:hsla(0,0%,100%,.9)}.bg-gradient-to-tr{background-image:linear-gradient(to top right,var(--tw-gradient-stops))}.from-blue-600{--tw-gradient-from:#2563eb var(--tw-gradient-from-position);--tw-gradient-to:rgba(37,99,235,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.object-contain{-o-object-fit:contain;object-fit:contain}.object-cover{-o-object-fit:cover;object-fit:cover}.p-0\.5{padding:.125rem}.p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pl-3\.5{padding-left:.875rem}.pr-12{padding-right:3rem}.pt-2{padding-top:.5rem}.text-center{text-align:center}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:.05em}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87/var(--tw-text-opacity,1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72/var(--tw-text-opacity,1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.line-through{text-decoration-line:line-through}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-slate-400::-moz-placeholder{--tw-placeholder-opacity:1;color:rgb(148 163 184/var(--tw-placeholder-opacity,1))}.placeholder-slate-400::placeholder{--tw-placeholder-opacity:1;color:rgb(148 163 184/var(--tw-placeholder-opacity,1))}.shadow-md{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color)}.shadow-md,.shadow-sm{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color)}.shadow-blue-500\/20{--tw-shadow-color:rgba(59,130,246,.2);--tw-shadow:var(--tw-shadow-colored)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-300{transition-duration:.3s}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-blue-100:hover{--tw-bg-opacity:1;background-color:rgb(219 234 254/var(--tw-bg-opacity,1))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216/var(--tw-bg-opacity,1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.hover\:bg-slate-300:hover{--tw-bg-opacity:1;background-color:rgb(203 213 225/var(--tw-bg-opacity,1))}.hover\:text-rose-500:hover{--tw-text-opacity:1;color:rgb(244 63 94/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.focus\:border-blue-500:focus{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus\:ring-blue-500\/20:focus{--tw-ring-color:rgba(59,130,246,.2)}.active\:bg-blue-800:active{--tw-bg-opacity:1;background-color:rgb(30 64 175/var(--tw-bg-opacity,1))}@media (min-width:640px){.sm\:block{display:block}.sm\:w-auto{width:auto}.sm\:max-w-\[250px\]{max-width:250px}.sm\:p-7{padding:1.75rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}}@media (min-width:768px){.md\:col-span-1{grid-column:span 1/span 1}.md\:col-span-2{grid-column:span 2/span 2}.md\:col-span-3{grid-column:span 3/span 3}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:1024px){.lg\:col-span-2{grid-column:span 2/span 2}.lg\:col-span-3{grid-column:span 3/span 3}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}
-    body { font-family: 'Sarabun', sans-serif; }
+  <title>Product Intelligence · เปรียบเทียบสินค้าคู่แข่ง</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.collapse{visibility:collapse}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.bottom-2{bottom:.5rem}.left-3{left:.75rem}.right-2{right:.5rem}.top-0{top:0}.top-1\/2{top:50%}.top-2{top:.5rem}.top-3{top:.75rem}.z-40{z-index:40}.z-50{z-index:50}.col-span-full{grid-column:1/-1}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:.5rem}.mb-4{margin-bottom:1rem}.ml-auto{margin-left:auto}.mr-1{margin-right:.25rem}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.hidden{display:none}.aspect-square{aspect-ratio:1/1}.h-1\.5{height:.375rem}.h-10{height:2.5rem}.h-20{height:5rem}.h-3{height:.75rem}.h-3\.5{height:.875rem}.h-4{height:1rem}.h-40{height:10rem}.h-5{height:1.25rem}.h-56{height:14rem}.h-9{height:2.25rem}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-1\.5{width:.375rem}.w-10{width:2.5rem}.w-20{width:5rem}.w-3{width:.75rem}.w-3\.5{width:.875rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-9{width:2.25rem}.w-full{width:100%}.min-w-0{min-width:0}.max-w-7xl{max-width:80rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.border-collapse{border-collapse:collapse}.-translate-y-1\/2{--tw-translate-y:-50%}.-translate-y-1\/2,.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}@keyframes spin{to{transform:rotate(1turn)}}.animate-spin{animation:spin 1s linear infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-md{border-radius:.375rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199/var(--tw-border-opacity,1))}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138/var(--tw-border-opacity,1))}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254/var(--tw-border-opacity,1))}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253/var(--tw-border-opacity,1))}.border-blue-600{--tw-border-opacity:1;border-color:rgb(37 99 235/var(--tw-border-opacity,1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208/var(--tw-border-opacity,1))}.border-rose-200{--tw-border-opacity:1;border-color:rgb(254 205 211/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225/var(--tw-border-opacity,1))}.border-t-transparent{border-top-color:transparent}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235/var(--tw-bg-opacity,1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235/var(--tw-bg-opacity,1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242/var(--tw-bg-opacity,1))}.bg-rose-500{--tw-bg-opacity:1;background-color:rgb(244 63 94/var(--tw-bg-opacity,1))}.bg-sky-50{--tw-bg-opacity:1;background-color:rgb(240 249 255/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184/var(--tw-bg-opacity,1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42/var(--tw-bg-opacity,1))}.bg-slate-900\/40{background-color:rgba(15,23,42,.4)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/90{background-color:hsla(0,0%,100%,.9)}.bg-white\/95{background-color:hsla(0,0%,100%,.95)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.from-blue-600{--tw-gradient-from:#2563eb var(--tw-gradient-from-position);--tw-gradient-to:rgba(37,99,235,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.to-indigo-700{--tw-gradient-to:#4338ca var(--tw-gradient-to-position)}.object-contain{-o-object-fit:contain;object-fit:contain}.p-0\.5{padding:.125rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pl-5{padding-left:1.25rem}.pl-7{padding-left:1.75rem}.pr-3{padding-right:.75rem}.pt-2{padding-top:.5rem}.text-center{text-align:center}.align-middle{vertical-align:middle}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:.025em}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6/var(--tw-text-opacity,1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14/var(--tw-text-opacity,1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15/var(--tw-text-opacity,1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235/var(--tw-text-opacity,1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105/var(--tw-text-opacity,1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87/var(--tw-text-opacity,1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72/var(--tw-text-opacity,1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60/var(--tw-text-opacity,1))}.text-sky-700{--tw-text-opacity:1;color:rgb(3 105 161/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.line-through{text-decoration-line:line-through}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-slate-400::-moz-placeholder{--tw-placeholder-opacity:1;color:rgb(148 163 184/var(--tw-placeholder-opacity,1))}.placeholder-slate-400::placeholder{--tw-placeholder-opacity:1;color:rgb(148 163 184/var(--tw-placeholder-opacity,1))}.shadow-md{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color)}.shadow-md,.shadow-sm{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-blue-600\/20{--tw-shadow-color:rgba(37,99,235,.2);--tw-shadow:var(--tw-shadow-colored)}.outline{outline-style:solid}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:-translate-y-0\.5:hover{--tw-translate-y:-0.125rem;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-blue-400:hover{--tw-border-opacity:1;border-color:rgb(96 165 250/var(--tw-border-opacity,1))}.hover\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255/var(--tw-bg-opacity,1))}.hover\:bg-blue-50\/40:hover{background-color:rgba(239,246,255,.4)}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216/var(--tw-bg-opacity,1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85/var(--tw-bg-opacity,1))}.hover\:text-blue-700:hover{--tw-text-opacity:1;color:rgb(29 78 216/var(--tw-text-opacity,1))}.hover\:text-rose-600:hover{--tw-text-opacity:1;color:rgb(225 29 72/var(--tw-text-opacity,1))}.hover\:text-slate-800:hover{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.hover\:underline:hover{text-decoration-line:underline}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.focus\:border-blue-500:focus{--tw-border-opacity:1;border-color:rgb(59 130 246/var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.focus\:ring-blue-500\/20:focus{--tw-ring-color:rgba(59,130,246,.2)}.active\:bg-blue-800:active{--tw-bg-opacity:1;background-color:rgb(30 64 175/var(--tw-bg-opacity,1))}.disabled\:bg-slate-300:disabled{--tw-bg-opacity:1;background-color:rgb(203 213 225/var(--tw-bg-opacity,1))}@media (min-width:640px){.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:p-6{padding:1.5rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width:768px){.md\:block{display:block}.md\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}}@media (min-width:1024px){.lg\:col-span-2{grid-column:span 2/span 2}.lg\:col-span-3{grid-column:span 3/span 3}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.lg\:flex-row{flex-direction:row}.lg\:items-center{align-items:center}}
+    body { font-family: 'Sarabun', system-ui, sans-serif; }
+    .ring-score { background: conic-gradient(var(--c) calc(var(--v) * 1%), #e2e8f0 0); }
+    .scroll-x { scrollbar-width: none; } .scroll-x::-webkit-scrollbar { display: none; }
+    .drop-active { outline: 2px dashed #2563eb; outline-offset: -6px; background: #eff6ff; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    .skeleton { position: relative; overflow: hidden; background: #f1f5f9; }
+    .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); animation: shimmer 1.4s infinite; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased">
 
-  <!-- Header -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-500/20">
-          VS
+  <!-- ================= Header ================= -->
+  <header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-600/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg>
         </div>
-        <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Product Intelligence System</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">ดึงสินค้าจริงจากเว็บแบรนด์ แล้วให้ Gemini เทียบจากรูป</p>
+        <div class="min-w-0">
+          <h1 class="text-base font-bold text-slate-900 leading-tight truncate">Product Intelligence</h1>
+          <p class="text-xs text-slate-500 truncate">เทียบสินค้า ราคา และโปรโมชั่นคู่แข่ง 12 แบรนด์ จากรูปและรายละเอียด</p>
         </div>
       </div>
-      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-        ระบบพร้อมใช้งาน
-      </span>
+      <div class="flex items-center gap-2">
+        <span id="statusPill" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+          <span id="statusDot" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span id="statusText">กำลังเชื่อมต่อ…</span>
+        </span>
+        <button onclick="openSettings()" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500" title="ตั้งค่ารหัสเข้าใช้งาน">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <!-- Search Section -->
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7">
-      <div class="border-b border-slate-100 pb-4 mb-6">
-        <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          ระบุคำค้นหา หรือ อัปโหลดรูปภาพเพื่อค้นหา
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <!-- Input Text & Image Upload -->
-        <div class="space-y-3">
-          <label class="block text-xs font-semibold text-slate-700">พิมพ์ชื่อสินค้า / คุณลักษณะที่ต้องการค้นหา</label>
-          <div class="relative flex items-center">
-            <input type="text" id="searchInput" placeholder="เช่น Wacoal Wireless Bra บราไร้โครง รุ่น WB3A14" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-            
-            <label for="imageUpload" class="absolute right-2 p-1.5 bg-slate-200/60 hover:bg-slate-300 text-slate-600 rounded-lg cursor-pointer transition-all" title="อัปโหลดรูปภาพเพื่อค้นหา">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </label>
-            <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+    <!-- ================= Search ================= -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <!-- Drop zone -->
+        <div class="lg:col-span-2">
+          <label class="block text-xs font-semibold text-slate-600 mb-2">1. รูปสินค้าอ้างอิง <span class="font-normal text-slate-400">(ใช้เป็นหลักในการเทียบ)</span></label>
+          <div id="dropZone" onclick="document.getElementById('imageUpload').click()"
+               class="relative h-56 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40 transition-all cursor-pointer flex items-center justify-center overflow-hidden">
+            <div id="dropHint" class="text-center px-4">
+              <svg class="w-10 h-10 mx-auto text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.16-5.16a2.25 2.25 0 013.18 0l5.16 5.16m-1.5-1.5l1.41-1.41a2.25 2.25 0 013.18 0l2.91 2.91M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21zM14.25 8.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+              <p class="mt-2 text-sm font-semibold text-slate-700">ลากรูปมาวาง · คลิกเลือกไฟล์ · หรือกด Ctrl+V</p>
+              <p class="text-xs text-slate-400 mt-0.5">JPG / PNG · ไม่ใส่รูปก็ค้นจากข้อความได้</p>
+            </div>
+            <img id="imagePreview" class="hidden absolute inset-0 w-full h-full object-contain bg-white p-2" alt="รูปอ้างอิง">
+            <button id="removeImgBtn" onclick="event.stopPropagation(); removeSelectedImage()"
+                    class="hidden absolute top-2 right-2 bg-white/95 border border-slate-200 rounded-lg px-2 py-1 text-xs font-semibold text-slate-600 hover:text-rose-600 shadow-sm">✕ ลบรูป</button>
           </div>
+          <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+        </div>
 
-          <div id="imagePreviewContainer" class="hidden flex items-center justify-between bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
-            <div class="flex items-center space-x-3">
-              <img id="imagePreview" src="" alt="Selected Preview" class="w-12 h-12 object-cover rounded-lg border border-slate-200">
-              <div>
-                <p id="imageFileName" class="text-xs font-semibold text-slate-800 truncate max-w-[180px] sm:max-w-[250px]">filename.jpg</p>
-                <p class="text-[10px] text-blue-600 font-medium">แนบรูปภาพแล้ว (ระบบจะวิเคราะห์ด้วย Gemini Vision)</p>
+        <!-- Text + options -->
+        <div class="lg:col-span-3 flex flex-col gap-4">
+          <div>
+            <label for="searchInput" class="block text-xs font-semibold text-slate-600 mb-2">2. รายละเอียดเพิ่มเติม <span class="font-normal text-slate-400">(ไม่บังคับ)</span></label>
+            <input type="text" id="searchInput" placeholder="เช่น บราไร้โครง ฟองน้ำบาง สีดำ คอทรงหัวใจ"
+                   onkeydown="if(event.key==='Enter') executeRealSearch()"
+                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+            <div class="flex flex-wrap gap-1.5 mt-2" id="quickChips"></div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="ourPrice" class="block text-xs font-semibold text-slate-600 mb-2">3. ราคาสินค้าของเรา <span class="font-normal text-slate-400">(ไม่บังคับ)</span></label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">฿</span>
+                <input type="number" id="ourPrice" min="0" placeholder="เช่น 890" oninput="onOurPriceChange()"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
               </div>
             </div>
-            <button onclick="removeSelectedImage()" class="p-1 hover:bg-blue-100 text-slate-400 hover:text-rose-500 rounded-lg transition-all" title="ยกเลิกรูปนี้">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
+            <div class="flex items-end">
+              <button id="searchBtn" onclick="executeRealSearch()"
+                      class="w-full px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-slate-300 text-white rounded-xl font-semibold text-sm shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                ค้นหาคู่แข่ง
+              </button>
+            </div>
           </div>
+          <p class="text-xs text-slate-400">ค้นจาก Sabina · B'me · Wienna · Uniqlo · BSC · Triumph (เว็บ official) + แบรนด์ที่ทีมกรอกใน Google Sheet · ราคาอัปเดตอัตโนมัติทุกวัน</p>
         </div>
+      </div>
+    </section>
 
-        <!-- Preset Categories -->
-        <div class="space-y-3">
-          <label class="block text-xs font-semibold text-slate-700">หรือ เลือกหมวดหมู่สำเร็จรูป</label>
-          <select id="categorySelect" onchange="applyCategory()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer">
-            <option value="">-- เลือกจากหมวดหมู่ --</option>
-            <option value="บราไร้โครง Wireless Bra">บราไร้โครง Wireless Bra</option>
-            <option value="ชุดชั้นในกระชับสัดส่วน Seamless">ชุดชั้นในกระชับสัดส่วน Seamless</option>
-            <option value="สปอร์ตบราผ้าระบายอากาศ">สปอร์ตบราผ้าระบายอากาศ</option>
+    <!-- ================= Progress ================= -->
+    <section id="progressSection" class="hidden bg-white rounded-2xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm font-semibold text-slate-800">กำลังค้นหา… <span id="progressSec" class="text-slate-400 font-normal"></span></p>
+        <p class="text-xs text-slate-400">ปกติใช้เวลา 20–60 วินาที</p>
+      </div>
+      <ol id="stepList" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></ol>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+        <div class="skeleton h-40 rounded-xl"></div><div class="skeleton h-40 rounded-xl"></div>
+        <div class="skeleton h-40 rounded-xl hidden md:block"></div><div class="skeleton h-40 rounded-xl hidden md:block"></div>
+      </div>
+    </section>
+
+    <!-- ================= Error ================= -->
+    <section id="errorSection" class="hidden bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl p-5 text-center">
+      <p class="font-bold">เกิดข้อผิดพลาดในการค้นหา</p>
+      <p id="errorText" class="text-xs mt-1"></p>
+    </section>
+
+    <!-- ================= Results ================= -->
+    <section id="resultSection" class="hidden space-y-4">
+      <!-- Reference -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 flex gap-4 items-start">
+        <img id="refThumb" class="hidden w-20 h-20 rounded-xl object-contain bg-slate-50 border border-slate-200" alt="">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-blue-600">สินค้าอ้างอิง (วิเคราะห์โดย AI)</p>
+          <p id="refSummary" class="text-sm font-semibold text-slate-900 mt-0.5"></p>
+          <div id="refFeatures" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
+        <span id="cacheBadge" class="hidden text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 whitespace-nowrap">ผลที่จำไว้</span>
+      </div>
+
+      <!-- Summary tiles -->
+      <div id="summaryTiles" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+
+      <!-- Toolbar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-3 flex flex-col lg:flex-row lg:items-center gap-3">
+        <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold self-start" role="group">
+          <button id="modeBest" onclick="setViewMode('best')" class="px-3 py-1.5 rounded-md">แบรนด์ละ 1 รุ่น</button>
+          <button id="modeAll" onclick="setViewMode('all')" class="px-3 py-1.5 rounded-md">แสดงทั้งหมด</button>
+        </div>
+        <div id="brandFilter" class="flex gap-1.5 overflow-x-auto scroll-x flex-1"></div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <label class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 cursor-pointer select-none">
+            <input type="checkbox" id="saleOnly" onchange="rerender()" class="rounded border-slate-300 text-blue-600"> เฉพาะที่ลดราคา
+          </label>
+          <select id="sortBy" onchange="rerender()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">
+            <option value="score">เรียง: ใกล้เคียงที่สุด</option>
+            <option value="priceAsc">ราคา ต่ำ → สูง</option>
+            <option value="priceDesc">ราคา สูง → ต่ำ</option>
+            <option value="discount">ส่วนลดมากที่สุด</option>
           </select>
+          <button onclick="exportPdf()" class="text-xs font-semibold rounded-lg px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-700 inline-flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17h6M9 13h6M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9l-6-6zM14 3v6h6"/></svg>
+            รายงาน PDF
+          </button>
+          <button onclick="exportCsv()" class="text-xs font-semibold border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 inline-flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+            Excel (CSV)
+          </button>
         </div>
       </div>
 
-      <div class="mt-6 flex justify-end">
-        <button onclick="executeRealSearch()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold text-sm shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          ค้นหา & วิเคราะห์ข้อมูลสินค้า
-        </button>
-      </div>
+      <div id="resultGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="coverageBox"></div>
+      <div id="warningBox"></div>
     </section>
 
-    <!-- Results Section -->
-    <section id="comparisonSection" class="space-y-5 hidden">
-      <div class="flex items-center justify-between border-b border-slate-200 pb-3">
-        <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900">ผลเปรียบเทียบสินค้าคู่แข่ง (ข้อมูลจริงจากเว็บแบรนด์)</h2>
-          <p class="text-xs text-slate-500 mt-0.5" id="searchKeywordLabel">ผลลัพธ์การค้นหา</p>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap justify-end">
-          <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs font-semibold" role="group" aria-label="รูปแบบการแสดงผล">
-            <button id="modeBest" onclick="setViewMode('best')" class="px-3 py-1 rounded-md">แบรนด์ละ 1 รุ่น</button>
-            <button id="modeAll" onclick="setViewMode('all')" class="px-3 py-1 rounded-md">แสดงทั้งหมด</button>
-          </div>
-          <span id="resultCount" class="text-xs font-semibold bg-slate-200/80 text-slate-700 px-3 py-1 rounded-full">พบ 0 รายการ</span>
-        </div>
-      </div>
-
-      <div id="comparisonGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Cards will be populated here -->
-      </div>
+    <!-- ================= Empty state ================= -->
+    <section id="emptyState" class="text-center py-10 text-slate-400">
+      <p class="text-sm">ใส่รูปหรือรายละเอียดสินค้า แล้วกด <b class="text-slate-600">ค้นหาคู่แข่ง</b></p>
+      <p class="text-xs mt-1">ระบบจะหาสินค้าที่ใกล้เคียงที่สุดของแต่ละแบรนด์ พร้อมราคา ส่วนลด และราคาต่ำสุดใน 30 วัน</p>
     </section>
-
   </main>
 
+  <!-- ================= Settings modal ================= -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" onclick="if(event.target===this) closeSettings()">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5">
+      <h3 class="font-bold text-slate-900">รหัสเข้าใช้งาน</h3>
+      <p class="text-xs text-slate-500 mt-1">ขอรหัสจากผู้ดูแลระบบ (ค่า APP_TOKEN ใน Apps Script) เบราว์เซอร์นี้จะจำไว้</p>
+      <input id="tokenInput" type="password" placeholder="รหัสเข้าใช้งาน" onkeydown="if(event.key==='Enter') saveSettings()"
+             class="mt-3 w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+      <p id="tokenMsg" class="text-xs text-rose-600 mt-2 hidden"></p>
+      <div class="flex justify-end gap-2 mt-4">
+        <button onclick="closeSettings()" class="px-4 py-2 text-sm rounded-lg hover:bg-slate-100">ยกเลิก</button>
+        <button onclick="saveSettings()" class="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ⚠️ นำ Web App URL จาก Google Apps Script มาวางแทนที่ตรงนี้
+    // ⚠️ Web App URL จาก Google Apps Script
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec";
 
-    let selectedBase64Image = null;
-
-    function applyCategory() {
-      const selected = document.getElementById("categorySelect").value;
-      if (selected) {
-        document.getElementById("searchInput").value = selected;
-      }
-    }
-
-    function handleImageSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 448; // ย่อรูปอ้างอิงก่อนส่ง → อัปโหลดและวิเคราะห์เร็วขึ้น (พอสำหรับดูทรง)
-            const scaleSize = MAX_WIDTH / img.width;
-            
-            if (scaleSize < 1) {
-              canvas.width = MAX_WIDTH;
-              canvas.height = img.height * scaleSize;
-            } else {
-              canvas.width = img.width;
-              canvas.height = img.height;
-            }
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            selectedBase64Image = canvas.toDataURL('image/jpeg', 0.75);
-            document.getElementById("imagePreview").src = selectedBase64Image;
-            document.getElementById("imageFileName").innerText = file.name;
-            document.getElementById("imagePreviewContainer").classList.remove("hidden");
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function removeSelectedImage() {
-      selectedBase64Image = null;
-      document.getElementById("imageUpload").value = "";
-      document.getElementById("imagePreviewContainer").classList.add("hidden");
-    }
-
-    const MIN_BRANDS = 6;
+    /* ---------------- helpers ---------------- */
+    const $ = id => document.getElementById(id);
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-    const baht = n => "฿" + Number(n).toLocaleString("en-US");
-    // รูปบนการ์ดใช้ขนาดย่อจาก CDN ที่รองรับ → หน้าเว็บโหลดเร็วขึ้น
+    const baht = n => "฿" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
+                    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
     const displayImg = u => (u && /image\.uniqlo\.com|cdn\.shopify\.com|\/cdn\/shop\//i.test(u) && !/[?&]width=/.test(u))
       ? u + (u.includes("?") ? "&" : "?") + "width=600" : u;
+    const discountOf = x => x.compareAt && x.price ? Math.round((1 - x.price / x.compareAt) * 100) : 0;
+    const scoreColor = s => s >= 80 ? "#10b981" : s >= 60 ? "#f59e0b" : "#94a3b8";
 
-    let searchSeq = 0; // กันผลของการค้นหาเก่าทับการค้นหาใหม่
+    let selectedBase64Image = null, lastResult = null, searchSeq = 0;
+    let viewMode = store.get("pis_view", "best") === "all" ? "all" : "best";
+    let hiddenBrands = new Set();
 
-    // ปลุก Apps Script ตั้งแต่เปิดหน้า (ลดเวลารอเซิร์ฟเวอร์เริ่มทำงานตอนกดค้นหาจริง)
+    /* ---------------- status / warm-up ---------------- */
     window.addEventListener("load", () => {
-      if (GAS_API_URL && !GAS_API_URL.includes("YOUR_DEPLOYMENT_ID"))
-        fetch(GAS_API_URL + "?ping=1").then(r => r.json()).then(j => console.log("Apps Script version", j.version)).catch(() => {});
+      paintToggle(); renderChips();
+      fetch(GAS_API_URL + "?ping=1").then(r => r.json()).then(j => {
+        $("statusDot").className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+        $("statusPill").className = "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700";
+        $("statusText").textContent = "พร้อมใช้งาน · v" + j.version;
+      }).catch(() => { $("statusText").textContent = "เชื่อมต่อไม่ได้"; $("statusDot").className = "w-1.5 h-1.5 rounded-full bg-rose-500"; });
     });
 
-    // จำผลค้นหาในเบราว์เซอร์: ค้นซ้ำด้วยรูป/ข้อความเดิม → แสดงทันทีไม่ต้องรอ (เก็บ 6 ชม.)
-    const CLIENT_CACHE_MS = 6 * 60 * 60 * 1000;
-    const memCache = new Map();
-    function cacheKey(q, img) {
-      let h = 0; const s = (q || "") + "|" + (img || "");
-      for (let i = 0; i < s.length; i += 7) h = (h * 31 + s.charCodeAt(i)) | 0; // เร็ว: สุ่มทุก 7 ตัวอักษร
-      return "pis_" + s.length + "_" + h;
+    /* ---------------- quick chips ---------------- */
+    const CHIPS = ["บราไร้โครง", "ฟองน้ำบาง", "ดันทรง", "ลูกไม้", "ไร้ตะเข็บ", "สปอร์ตบรา", "สีดำ", "สีเนื้อ"];
+    function renderChips() {
+      $("quickChips").innerHTML = CHIPS.map(c =>
+        `<button type="button" onclick="addChip('${c}')" class="px-2.5 py-1 rounded-full text-xs border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50">+ ${c}</button>`).join("");
     }
+    function addChip(c) { const el = $("searchInput"); if (!el.value.includes(c)) el.value = (el.value + " " + c).trim(); el.focus(); }
+
+    /* ---------------- image: click / drag / paste ---------------- */
+    function loadImageFile(file) {
+      if (!file || !/^image\//.test(file.type)) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 448, sc = Math.min(1, MAX / Math.max(img.width, img.height));
+          const cv = document.createElement("canvas");
+          cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
+          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+          selectedBase64Image = cv.toDataURL("image/jpeg", 0.75);
+          $("imagePreview").src = selectedBase64Image;
+          $("imagePreview").classList.remove("hidden"); $("removeImgBtn").classList.remove("hidden"); $("dropHint").classList.add("hidden");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    function handleImageSelect(ev) { loadImageFile(ev.target.files[0]); }
+    function removeSelectedImage() {
+      selectedBase64Image = null; $("imageUpload").value = "";
+      $("imagePreview").classList.add("hidden"); $("removeImgBtn").classList.add("hidden"); $("dropHint").classList.remove("hidden");
+    }
+    const dz = document.getElementById("dropZone");
+    ["dragenter", "dragover"].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add("drop-active"); }));
+    ["dragleave", "drop"].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove("drop-active"); }));
+    dz.addEventListener("drop", e => loadImageFile(e.dataTransfer.files[0]));
+    document.addEventListener("paste", e => {
+      const it = [...(e.clipboardData || {}).items || []].find(i => i.type.startsWith("image/"));
+      if (it) loadImageFile(it.getAsFile());
+    });
+
+    /* ---------------- token ---------------- */
+    function openSettings(msg) {
+      $("tokenInput").value = store.get("pis_token", "");
+      $("tokenMsg").textContent = msg || ""; $("tokenMsg").classList.toggle("hidden", !msg);
+      $("settingsModal").classList.remove("hidden"); setTimeout(() => $("tokenInput").focus(), 50);
+    }
+    function closeSettings() { $("settingsModal").classList.add("hidden"); }
+    function saveSettings() { store.set("pis_token", $("tokenInput").value.trim()); closeSettings(); }
+
+    /* ---------------- client cache (6 ชม.) ---------------- */
+    const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
+    function cacheKey(q, img) { let h = 0; const s = (q || "") + "|" + (img || ""); for (let i = 0; i < s.length; i += 7) h = (h * 31 + s.charCodeAt(i)) | 0; return "pis_" + s.length + "_" + h; }
     function cacheGet(k) {
       const m = memCache.get(k); if (m && Date.now() - m.t < CLIENT_CACHE_MS) return m.v;
       try { const x = JSON.parse(sessionStorage.getItem(k) || "null"); if (x && Date.now() - x.t < CLIENT_CACHE_MS) return x.v; } catch (e) {}
       return null;
     }
-    function cacheSet(k, v) {
-      memCache.set(k, { t: Date.now(), v: v });
-      try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), v: v })); } catch (e) {}
-    }
+    function cacheSet(k, v) { memCache.set(k, { t: Date.now(), v }); try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), v })); } catch (e) {} }
 
+    /* ---------------- API ---------------- */
     async function callApi(payload) {
-      const response = await fetch(GAS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      const raw = await response.text();
-      let result;
-      try { result = JSON.parse(raw); }
+      const res = await fetch(GAS_API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+      const raw = await res.text();
+      let r;
+      try { r = JSON.parse(raw); }
       catch (e) {
-        const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ")
-                       .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
-        throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + response.status + "): " + (txt || "ไม่มีข้อความ") +
-          " — ให้เปิด Apps Script → Executions เพื่อดู error จริง หรือตรวจว่า Deploy เป็น New version และตั้ง Who has access = Anyone แล้ว");
+        const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
+        throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + res.status + "): " + (txt || "ไม่มีข้อความ") + " — ตรวจ Deploy (New version, Who has access = Anyone)");
       }
-      if (result.status !== "success") throw new Error(result.message || "เกิดข้อผิดพลาดในการดึงข้อมูล");
-      return result;
+      if (r.status !== "success") { const err = new Error(r.message || "เกิดข้อผิดพลาด"); err.code = r.code; throw err; }
+      return r;
     }
 
-    function cardHtml(item) {
-      const fallbackImg = `https://placehold.co/600x400/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
-      const scoreColor = item.matchScore >= 80 ? "bg-emerald-500" : item.matchScore >= 60 ? "bg-amber-500" : "bg-slate-400";
-      const oldPrice = item.compareAt ? `<span class="text-sm text-slate-400 line-through ml-2">${baht(item.compareAt)}</span>
-          <span class="text-xs font-bold text-rose-600 ml-1">-${item.discountPct}%</span>` : "";
-      const promo = item.promoName ? esc(item.promoName) : (item.compareAt ? "ลดราคาจากราคาปกติ" : "ไม่พบโปรโมชั่นเฉพาะรุ่น");
-      return `
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-          <div>
-            <div class="relative w-full h-64 bg-slate-100 overflow-hidden border-b border-slate-100">
-              <img src="${esc(displayImg(item.imageUrl))}" alt="${esc(item.title)}" referrerpolicy="no-referrer" loading="lazy"
-                   class="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300"
-                   onerror="this.onerror=null;this.src='${fallbackImg}';">
-              <span class="absolute top-3 left-3 text-xs font-bold text-blue-600 uppercase tracking-wider bg-white/90 px-3 py-1 rounded-lg shadow-sm border border-slate-200">${esc(item.brand)}</span>
-              <span class="absolute top-3 right-3 ${scoreColor} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">ใกล้เคียง ${item.matchScore}%</span>
-              ${item.imageScore != null ? `<span class="absolute bottom-3 right-3 bg-white/90 text-slate-700 text-[11px] font-semibold px-2 py-0.5 rounded-lg border border-slate-200">🖼 รูป ${item.imageScore}% · 📝 รายละเอียด ${item.textScore ?? "-"}%</span>` : ""}
-            </div>
-            <div class="p-5 space-y-3">
-              <h4 class="font-bold text-slate-900 text-base leading-snug">${esc(item.title)}</h4>
-              <p class="text-xs text-slate-500">รหัส: ${esc(item.code || "-")}</p>
-              <div class="text-lg font-bold text-slate-800">${esc(item.priceText)}${oldPrice}</div>
-              <div class="bg-amber-50 text-amber-900 p-2.5 rounded-xl text-xs font-medium border border-amber-200/60">⭐ ${promo}</div>
-              ${item.similar ? `<p class="text-xs text-slate-700"><b>เหมือน:</b> ${esc(item.similar)}</p>` : ""}
-              ${item.different ? `<p class="text-xs text-slate-700"><b>ต่าง:</b> ${esc(item.different)}</p>` : ""}
-            </div>
-          </div>
-          <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400">ข้อมูลจาก ${esc(item.source)}</span>
-            <a href="${esc(item.url)}" target="_blank" rel="noopener" class="text-xs font-semibold text-blue-600 hover:underline">ดูหน้าสินค้า →</a>
-          </div>
-        </div>`;
-    }
-
-    // ---------- โหมดแสดงผล: แบรนด์ละ 1 รุ่น / แสดงทั้งหมด (จำไว้ในเบราว์เซอร์) ----------
-    let viewMode = "best", lastResult = null;
-    try { viewMode = localStorage.getItem("pis_view") === "all" ? "all" : "best"; } catch (e) {}
-    function paintToggle() {
-      const on = "px-3 py-1 rounded-md bg-blue-600 text-white", off = "px-3 py-1 rounded-md text-slate-600 hover:bg-slate-100";
-      document.getElementById("modeBest").className = viewMode === "best" ? on : off;
-      document.getElementById("modeAll").className = viewMode === "all" ? on : off;
-    }
-    function setViewMode(m) {
-      viewMode = m; paintToggle();
-      try { localStorage.setItem("pis_view", m); } catch (e) {}
-      if (lastResult) renderResult(lastResult);
-    }
-    window.addEventListener("DOMContentLoaded", paintToggle);
-
-    function renderResult(r) {
-      lastResult = r;
-      if (viewMode === "all" && (r.all || []).length) renderAll(r.all, r.warnings || [], r.coverage || []);
-      else render(r.data || [], r.warnings || [], r.coverage || []);
-    }
-
-    /** การ์ดเล็กสำหรับรุ่นอื่นของแบรนด์เดียวกัน */
-    function miniCardHtml(item) {
-      const fallbackImg = `https://placehold.co/300x300/f1f5f9/475569?text=${encodeURIComponent(item.brand)}`;
-      const scoreColor = item.matchScore >= 80 ? "bg-emerald-500" : item.matchScore >= 60 ? "bg-amber-500" : "bg-slate-400";
-      return `
-        <a href="${esc(item.url)}" target="_blank" rel="noopener" class="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition-all flex flex-col">
-          <div class="relative w-full h-40 bg-slate-100">
-            <img src="${esc(displayImg(item.imageUrl))}" alt="${esc(item.title)}" referrerpolicy="no-referrer" loading="lazy"
-                 class="w-full h-full object-contain p-2" onerror="this.onerror=null;this.src='${fallbackImg}';">
-            <span class="absolute top-2 right-2 ${scoreColor} text-white text-[11px] font-bold px-2 py-0.5 rounded-full">${item.matchScore}%</span>
-          </div>
-          <div class="p-3 space-y-1">
-            <p class="text-xs font-semibold text-slate-900 leading-snug">${esc(item.title)}</p>
-            <p class="text-xs font-bold text-slate-800">${esc(item.priceText)}${item.compareAt ? ` <span class="text-slate-400 line-through font-normal">${baht(item.compareAt)}</span>` : ""}</p>
-            ${item.imageScore != null ? `<p class="text-[11px] text-slate-500">🖼 รูป ${item.imageScore}% · 📝 ${item.textScore ?? "-"}%</p>` : ""}
-          </div>
-        </a>`;
-    }
-
-    /** โหมดแสดงทั้งหมด: จัดกลุ่มตามแบรนด์ รุ่นที่ใกล้ที่สุดเป็นการ์ดใหญ่ ที่เหลือเป็นการ์ดเล็ก */
-    function renderAll(all, warnings, coverage) {
-      const grid = document.getElementById("comparisonGrid");
-      const groups = {};
-      all.forEach(x => (groups[x.brand] = groups[x.brand] || []).push(x));
-      const brands = Object.keys(groups).sort((a, b) => groups[b][0].matchScore - groups[a][0].matchScore);
-      document.getElementById("resultCount").innerText = `พบ ${all.length} รุ่น จาก ${brands.length} แบรนด์`;
-      const html = brands.map(b => {
-        const list = groups[b].slice().sort((x, y) => (y.isBest - x.isBest) || (y.matchScore - x.matchScore));
-        const [top, ...rest] = list;
-        return `
-          <div class="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-2 pt-2">
-            <h3 class="text-sm font-bold text-slate-900">${esc(b)}</h3>
-            <span class="text-xs text-slate-500">${list.length} รุ่น</span>
-            <div class="flex-1 border-t border-slate-200"></div>
-          </div>
-          ${cardHtml(top)}
-          ${rest.length ? `<div class="col-span-1 md:col-span-1 lg:col-span-2 grid grid-cols-2 lg:grid-cols-3 gap-3 content-start">${rest.map(miniCardHtml).join("")}</div>` : ""}`;
-      }).join("");
-      grid.innerHTML = html + coverageHtml(coverage) + warningsHtml(warnings);
-    }
-
-    function coverageHtml(coverage) {
-      return (coverage || []).length ? `
-        <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
-          <b>แบรนด์ที่ค้น:</b>
-          ${coverage.map(c => c.shown
-            ? `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ ${esc(c.brand)}</span>`
-            : `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200" title="ไม่พบสินค้าที่ยืนยันได้">– ${esc(c.brand)}</span>`).join("")}
-        </div>` : "";
-    }
-    function warningsHtml(warnings) {
-      const ws = (warnings || []).filter(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w));
-      return ws.length ? `<div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
-          ${ws.map(w => "⚠️ " + esc(w)).join("<br>")}</div>` : "";
-    }
-
-    function render(items, warnings, coverage) {
-      const grid = document.getElementById("comparisonGrid");
-      const sorted = items.slice().sort((a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0));
-      document.getElementById("resultCount").innerText =
-        `พบ ${sorted.length}/${(coverage || []).length || sorted.length} แบรนด์ (แบรนด์ละ 1 รุ่นที่ใกล้ที่สุด)`;
-      const more = (coverage || []).length ? `
-        <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
-          <b>แบรนด์ที่ค้น:</b>
-          ${coverage.map(c => c.shown
-            ? `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ ${esc(c.brand)}</span>`
-            : `<span class="inline-block m-0.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200" title="ไม่พบสินค้าที่ยืนยันได้">– ${esc(c.brand)}</span>`).join("")}
-        </div>` : "";
-      const warn = warnings.length ? `
-        <div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
-          ${warnings.map(w => "⚠️ " + esc(w)).join("<br>")}
-        </div>` : "";
-      const empty = !sorted.length
-        ? `<div class="col-span-3 text-center py-10 text-slate-500">ไม่พบรายการสินค้าที่ยืนยันได้จากเว็บแบรนด์</div>` : "";
-      grid.innerHTML = sorted.map(cardHtml).join("") + empty + more;
-      // ไม่ต้องแสดงบรรทัด "ไม่พบจาก ..." ซ้ำ เพราะมีแถบแบรนด์แล้ว
-      if (warn && warnings.some(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w)))
-        grid.innerHTML += `<div class="col-span-1 md:col-span-2 lg:col-span-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xl p-3">
-          ${warnings.filter(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w)).map(w => "⚠️ " + esc(w)).join("<br>")}</div>`;
-    }
-
-    async function executeRealSearch() {
-      const typed = document.getElementById("searchInput").value.trim();
-      // มีรูปแต่ไม่พิมพ์ → ส่งข้อความว่าง ให้ระบบใช้รูปเป็นหลัก (ไม่เติมคำให้เอง)
-      const textQuery = typed || (selectedBase64Image ? "" : "ชุดชั้นใน Seamless");
-      const section = document.getElementById("comparisonSection");
-      const grid = document.getElementById("comparisonGrid");
-      const keywordLabel = document.getElementById("searchKeywordLabel");
-      const seq = ++searchSeq;
-
-      if (!GAS_API_URL || GAS_API_URL.includes("YOUR_DEPLOYMENT_ID")) {
-        alert("กรุณาใส่ Web App URL จาก Google Apps Script ในตัวแปร GAS_API_URL ก่อนใช้งานนะครับ");
-        return;
-      }
-
-      section.classList.remove("hidden");
-      keywordLabel.innerText = selectedBase64Image
-        ? (textQuery ? `ค้นหาด้วยรูปภาพ (หลัก) + คำค้นหา: "${textQuery}"` : "ค้นหาด้วยรูปภาพ")
-        : `กำลังค้นหาข้อมูลสำหรับ: "${textQuery}"`;
-      document.getElementById("resultCount").innerText = "กำลังค้นหา…";
-      grid.innerHTML = `
-        <div class="col-span-1 md:col-span-3 text-center py-16 bg-white rounded-2xl border border-slate-200">
-          <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-          <p class="text-slate-600 font-medium text-sm">กำลังค้นหาสินค้าใกล้เคียงจาก 12 แบรนด์คู่แข่ง</p>
-          <p id="progressText" class="text-slate-400 text-xs mt-1">เริ่มค้นหา…</p>
-        </div>`;
-
+    /* ---------------- progress ---------------- */
+    const STEPS = [[0, "วิเคราะห์รูปสินค้า"], [5, "ดึงแคตตาล็อกคู่แข่ง"], [12, "โหลดรูปผู้สมัคร"], [16, "AI เทียบรูปทีละแบรนด์"]];
+    let progTimer = null;
+    function startProgress() {
       const t0 = Date.now();
-      const key = cacheKey(textQuery, selectedBase64Image);
-      const cachedResult = cacheGet(key);
-      // ข้อความความคืบหน้า + ตัวจับเวลา ระหว่างรอ
-      const steps = [[0, "วิเคราะห์รูปและค้นเว็บ…"], [6, "ดึงแคตตาล็อก Sabina / B'me / Triumph / Wienna / BSC / Uniqlo…"],
-                     [12, "โหลดรูปสินค้าคู่แข่ง…"], [16, "Gemini กำลังเทียบรูปทีละแบรนด์…"], [30, "ใกล้เสร็จแล้ว…"]];
-      const timer = cachedResult ? null : setInterval(() => {
+      ["resultSection", "errorSection", "emptyState"].forEach(id => $(id).classList.add("hidden"));
+      $("progressSection").classList.remove("hidden");
+      const paint = () => {
         const sec = Math.floor((Date.now() - t0) / 1000);
-        const el = document.getElementById("progressText");
-        if (!el || seq !== searchSeq) return clearInterval(timer);
-        el.textContent = steps.filter(s => sec >= s[0]).pop()[1] + " (" + sec + " วินาที)";
-      }, 500);
+        $("progressSec").textContent = "(" + sec + " วินาที)";
+        const cur = STEPS.filter(s => sec >= s[0]).length - 1;
+        $("stepList").innerHTML = STEPS.map((s, i) => {
+          const st = i < cur ? "done" : i === cur ? "now" : "todo";
+          const cls = st === "done" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : st === "now" ? "bg-blue-50 text-blue-700 border-blue-300" : "bg-slate-50 text-slate-400 border-slate-200";
+          const icon = st === "done" ? "✓" : st === "now" ? `<span class="inline-block w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin align-middle"></span>` : i + 1;
+          return `<li class="border rounded-lg px-3 py-2 flex items-center gap-2 ${cls}"><span class="font-bold">${icon}</span>${s[1]}</li>`;
+        }).join("");
+      };
+      paint(); progTimer = setInterval(paint, 500);
+    }
+    function stopProgress() { clearInterval(progTimer); $("progressSection").classList.add("hidden"); }
+
+    /* ---------------- search ---------------- */
+    async function executeRealSearch() {
+      const typed = $("searchInput").value.trim();
+      if (!typed && !selectedBase64Image) { $("searchInput").focus(); return; }
+      const query = typed;
+      const seq = ++searchSeq;
+      const key = cacheKey(query, selectedBase64Image);
+      const hit = cacheGet(key);
+      $("searchBtn").disabled = true;
+      if (!hit) startProgress();
+      const t0 = Date.now();
       try {
-        const r = cachedResult || await callApi({ query: textQuery, image: selectedBase64Image });
-        if (timer) clearInterval(timer);
+        const r = hit || await callApi({ query, image: selectedBase64Image, token: store.get("pis_token", "") });
         if (seq !== searchSeq) return;
-        if (!cachedResult) cacheSet(key, r);
-        const ref = r.reference;
-        if (ref) keywordLabel.innerText = `สินค้าอ้างอิง: ${ref.summary || textQuery}` +
-          (ref.features && ref.features.length ? ` · ${ref.features.join(" · ")}` : "");
-        renderResult(r);
-      } catch (error) {
-        if (timer) clearInterval(timer);
+        if (!hit) cacheSet(key, r);
+        stopProgress();
+        hiddenBrands = new Set();
+        lastResult = r;
+        $("cacheBadge").classList.toggle("hidden", !hit);
+        showResult(r);
+        console.log("ใช้เวลาค้นหา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที", hit ? "(จากแคชในเบราว์เซอร์)" : "", r.timing || "");
+      } catch (err) {
         if (seq !== searchSeq) return;
-        console.error("Search error:", error);
-        grid.innerHTML = `
-          <div class="col-span-1 md:col-span-3 text-center py-10 bg-rose-50 text-rose-700 rounded-2xl border border-rose-200 p-4">
-            <p class="font-bold">เกิดข้อผิดพลาดในการค้นหา</p>
-            <p class="text-xs mt-1">${esc(error.message)}</p>
-          </div>`;
-        document.getElementById("resultCount").innerText = "พบ 0 รายการ";
-        return;
+        stopProgress();
+        if (err.code === "AUTH") { openSettings("รหัสไม่ถูกต้องหรือยังไม่ได้ใส่ กรุณาใส่รหัสแล้วค้นหาอีกครั้ง"); }
+        $("errorText").textContent = err.message;
+        $("errorSection").classList.remove("hidden");
+      } finally { $("searchBtn").disabled = false; }
+    }
+
+    /* ---------------- render ---------------- */
+    function showResult(r) {
+      $("resultSection").classList.remove("hidden");
+      const ref = r.reference || {};
+      $("refSummary").textContent = ref.summary || ref.query || "-";
+      $("refFeatures").innerHTML = (ref.features || []).map(f => `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${esc(f)}</span>`).join("")
+        + (ref.wired && ref.wired !== "unknown" ? `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs">${ref.wired === "wireless" ? "ไร้โครง" : "มีโครง"}</span>` : "");
+      if (selectedBase64Image) { $("refThumb").src = selectedBase64Image; $("refThumb").classList.remove("hidden"); } else $("refThumb").classList.add("hidden");
+      rerender();
+    }
+
+    function currentItems() {
+      if (!lastResult) return [];
+      let items = (viewMode === "all" && (lastResult.all || []).length) ? lastResult.all.slice() : (lastResult.data || []).slice();
+      items = items.filter(x => !hiddenBrands.has(x.brand));
+      if ($("saleOnly").checked) items = items.filter(x => discountOf(x) > 0);
+      const s = $("sortBy").value;
+      const sorters = {
+        score: (a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),
+        priceAsc: (a, b) => (a.price ?? 1e9) - (b.price ?? 1e9),
+        priceDesc: (a, b) => (b.price ?? -1) - (a.price ?? -1),
+        discount: (a, b) => discountOf(b) - discountOf(a)
+      };
+      return items.sort(sorters[s] || sorters.score);
+    }
+
+    function rerender() {
+      if (!lastResult) return;
+      const items = currentItems();
+      renderSummary(items);
+      renderBrandFilter();
+      const grid = $("resultGrid");
+      if (!items.length) grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm">ไม่มีสินค้าตามตัวกรองที่เลือก</div>`;
+      else if (viewMode === "all" && $("sortBy").value === "score") grid.innerHTML = renderGrouped(items);
+      else grid.innerHTML = items.map(cardHtml).join("");
+      renderCoverage(lastResult.coverage || []);
+      renderWarnings(lastResult.warnings || []);
+    }
+
+    function renderSummary(items) {
+      const prices = items.map(x => x.price).filter(p => p > 0).sort((a, b) => a - b);
+      const brands = new Set(items.map(x => x.brand));
+      const onSale = items.filter(x => discountOf(x) > 0);
+      const median = prices.length ? prices[Math.floor((prices.length - 1) / 2)] : null;
+      const our = +$("ourPrice").value || 0;
+      const tiles = [
+        ["แบรนด์ / รุ่นที่พบ", `${brands.size} <span class="text-sm font-medium text-slate-400">/ ${items.length} รุ่น</span>`, ""],
+        ["ช่วงราคา", prices.length ? `${baht(prices[0])} – ${baht(prices[prices.length - 1])}` : "-", median ? `ราคากลาง ${baht(median)}` : ""],
+        ["กำลังลดราคา", `${onSale.length} <span class="text-sm font-medium text-slate-400">รุ่น</span>`,
+          onSale.length ? `ลดสูงสุด ${Math.max(...onSale.map(discountOf))}% · ${esc(onSale.sort((a, b) => discountOf(b) - discountOf(a))[0].brand)}` : "ไม่มีรุ่นที่ลดราคา"],
+        our && median
+          ? ["ราคาของเรา vs ตลาด", `${our > median ? "+" : ""}${Math.round((our - median) / median * 100)}%`,
+             `${baht(our)} เทียบราคากลาง · ถูกกว่า ${prices.filter(p => p > our).length}/${prices.length} รุ่น`]
+          : ["ราคาของเรา vs ตลาด", `<span class="text-sm font-medium text-slate-400">ใส่ราคาของเรา</span>`, "ช่องที่ 3 ด้านบน"]
+      ];
+      $("summaryTiles").innerHTML = tiles.map(([k, v, sub]) => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-4">
+          <p class="text-xs text-slate-500">${k}</p>
+          <p class="text-xl font-bold text-slate-900 mt-1">${v}</p>
+          ${sub ? `<p class="text-xs text-slate-500 mt-0.5">${sub}</p>` : ""}
+        </div>`).join("");
+    }
+    function onOurPriceChange() { if (lastResult) rerender(); }
+
+    function renderBrandFilter() {
+      const all = (viewMode === "all" && (lastResult.all || []).length) ? lastResult.all : (lastResult.data || []);
+      const counts = {}; all.forEach(x => counts[x.brand] = (counts[x.brand] || 0) + 1);
+      $("brandFilter").innerHTML = Object.keys(counts).map(b => {
+        const off = hiddenBrands.has(b);
+        return `<button data-brand="${esc(b)}" onclick="toggleBrand(this.dataset.brand)" class="whitespace-nowrap px-2.5 py-1 rounded-full text-xs border ${off ? "border-slate-200 text-slate-400 line-through" : "border-blue-200 bg-blue-50 text-blue-700"}">${esc(b)} ${viewMode === "all" ? counts[b] : ""}</button>`;
+      }).join("");
+    }
+    function toggleBrand(b) { hiddenBrands.has(b) ? hiddenBrands.delete(b) : hiddenBrands.add(b); rerender(); }
+
+    function paintToggle() {
+      const on = "px-3 py-1.5 rounded-md bg-white text-blue-700 shadow-sm", off = "px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-800";
+      $("modeBest").className = viewMode === "best" ? on : off;
+      $("modeAll").className = viewMode === "all" ? on : off;
+    }
+    function setViewMode(m) { viewMode = m; store.set("pis_view", m); paintToggle(); rerender(); }
+
+    function insightBadges(x) {
+      const b = [];
+      const d = discountOf(x);
+      if (d > 0) b.push(`<span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 text-[11px] font-semibold">ลด ${d}%</span>`);
+      const pi = x.priceInsight;
+      if (pi && pi.days >= 3) {
+        if (pi.isLowest) b.push(`<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold">ต่ำสุดใน 30 วัน</span>`);
+        else b.push(`<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px]">ต่ำสุด 30 วัน ${baht(pi.min30)}</span>`);
+        if (pi.changeFromPrev) b.push(`<span class="px-2 py-0.5 rounded-md ${pi.changeFromPrev < 0 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"} text-[11px]">${pi.changeFromPrev > 0 ? "▲" : "▼"} ${Math.abs(pi.changeFromPrev)}% จากครั้งก่อน</span>`);
       }
-      console.log("ใช้เวลาค้นหา", ((Date.now() - t0) / 1000).toFixed(1), "วินาที", cachedResult ? "(จากแคชในเบราว์เซอร์)" : "");
+      const our = +$("ourPrice").value || 0;
+      if (our && x.price) {
+        const diff = Math.round((x.price - our) / our * 100);
+        b.push(`<span class="px-2 py-0.5 rounded-md ${diff < 0 ? "bg-amber-50 text-amber-800" : "bg-sky-50 text-sky-700"} text-[11px]">${diff < 0 ? "ถูกกว่าเรา " + Math.abs(diff) : diff > 0 ? "แพงกว่าเรา " + diff : "เท่าราคาเรา "}${diff ? "%" : ""}</span>`);
+      }
+      return b.join("");
+    }
+
+    function scoreRing(s, size) {
+      return `<div class="ring-score rounded-full flex items-center justify-center" style="--v:${s};--c:${scoreColor(s)};width:${size}px;height:${size}px">
+                <div class="bg-white rounded-full flex items-center justify-center font-bold text-slate-800" style="width:${size - 8}px;height:${size - 8}px;font-size:${size / 3.6}px">${s}%</div></div>`;
+    }
+
+    function cardHtml(x) {
+      const fb = `https://placehold.co/600x600/f1f5f9/475569?text=${encodeURIComponent(x.brand).replace(/'/g, '%27')}`;
+      return `
+        <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col">
+          <div class="relative bg-slate-50 aspect-square">
+            <img src="${esc(displayImg(x.imageUrl))}" alt="${esc(x.title)}" referrerpolicy="no-referrer" loading="lazy"
+                 class="w-full h-full object-contain p-3" onerror="this.onerror=null;this.src='${fb}'">
+            <span class="absolute top-3 left-3 text-[11px] font-bold tracking-wide uppercase bg-white/95 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg">${esc(x.brand)}</span>
+            <div class="absolute top-2 right-2">${scoreRing(x.matchScore, 52)}</div>
+            ${x.imageScore != null ? `<span class="absolute bottom-2 right-2 bg-white/95 border border-slate-200 text-[11px] text-slate-600 px-2 py-0.5 rounded-md">รูป ${x.imageScore}% · รายละเอียด ${x.textScore ?? "-"}%</span>` : ""}
+          </div>
+          <div class="p-4 flex-1 flex flex-col gap-2">
+            <h4 class="font-semibold text-slate-900 text-sm leading-snug">${esc(x.title)}</h4>
+            <div class="flex items-baseline gap-2">
+              <span class="text-xl font-bold text-slate-900">${esc(x.priceText || (x.price != null ? "฿" + Number(x.price).toLocaleString() : "ไม่พบราคา"))}</span>
+              ${x.compareAt ? `<span class="text-sm text-slate-400 line-through">${baht(x.compareAt)}</span>` : ""}
+            </div>
+            <div class="flex flex-wrap gap-1">${insightBadges(x)}</div>
+            ${x.promoName ? `<p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5">🏷️ ${esc(x.promoName)}</p>` : ""}
+            ${x.similar ? `<p class="text-xs text-slate-600"><span class="text-emerald-600 font-semibold">เหมือน</span> ${esc(x.similar)}</p>` : ""}
+            ${x.different ? `<p class="text-xs text-slate-600"><span class="text-amber-600 font-semibold">ต่าง</span> ${esc(x.different)}</p>` : ""}
+          </div>
+          <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-400 truncate" title="${esc(x.source)}">${esc(x.code || "")}${x.code ? " · " : ""}${esc(x.source)}</span>
+            <a href="${esc(x.url)}" target="_blank" rel="noopener" class="font-semibold text-blue-600 hover:underline whitespace-nowrap">ดูสินค้า →</a>
+          </div>
+        </article>`;
+    }
+
+    function renderGrouped(items) {
+      const groups = {};
+      items.forEach(x => (groups[x.brand] = groups[x.brand] || []).push(x));
+      return Object.keys(groups).map(b => `
+        <div class="col-span-full flex items-center gap-2 pt-2">
+          <h3 class="text-sm font-bold text-slate-900">${esc(b)}</h3>
+          <span class="text-xs text-slate-400">${groups[b].length} รุ่น</span>
+          <div class="flex-1 border-t border-slate-200"></div>
+        </div>` + groups[b].map(cardHtml).join("")).join("");
+    }
+
+    function renderCoverage(cov) {
+      $("coverageBox").innerHTML = cov.length ? `
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 text-xs text-slate-600 flex flex-wrap items-center gap-1.5">
+          <b class="mr-1">แบรนด์ที่ค้น</b>
+          ${cov.map(c => c.shown
+            ? `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ ${esc(c.brand)}</span>`
+            : `<span class="px-2 py-0.5 rounded-full bg-slate-50 text-slate-400 border border-slate-200" title="ยังไม่พบสินค้าที่ยืนยันได้ · เพิ่มได้ใน Google Sheet">– ${esc(c.brand)}</span>`).join("")}
+          <span class="text-slate-400 ml-auto">แบรนด์ที่ยังไม่พบ เพิ่มสินค้าได้ใน Google Sheet (แท็บ Catalog)</span>
+        </div>` : "";
+    }
+    function renderWarnings(ws) {
+      ws = ws.filter(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w));
+      $("warningBox").innerHTML = ws.length ? `
+        <details class="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-3 text-xs">
+          <summary class="cursor-pointer font-semibold">⚠️ หมายเหตุจากระบบ (${ws.length})</summary>
+          <ul class="mt-2 list-disc pl-5 space-y-1">${ws.map(w => `<li>${esc(w)}</li>`).join("")}</ul>
+        </details>` : "";
+    }
+
+
+    /* ---------------- PDF report ---------------- */
+    function buildReportHtml() {
+      const items = currentItems();
+      const r = lastResult || {}, ref = r.reference || {};
+      const our = +$("ourPrice").value || 0;
+      const now = new Date();
+      const dateTh = now.toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" });
+      const timeTh = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+      const priced = items.filter(x => x.price > 0);
+      const prices = priced.map(x => x.price).sort((a, b) => a - b);
+      const median = prices.length ? prices[Math.floor((prices.length - 1) / 2)] : null;
+      const avg = prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : null;
+      const brands = [...new Set(items.map(x => x.brand))];
+      const onSale = items.filter(x => discountOf(x) > 0).sort((a, b) => discountOf(b) - discountOf(a));
+      const cheapest = priced.slice().sort((a, b) => a.price - b.price)[0];
+      const priciest = priced.slice().sort((a, b) => b.price - a.price)[0];
+      const best = items.slice().sort((a, b) => b.matchScore - a.matchScore)[0];
+      const lowest30 = items.filter(x => x.priceInsight && x.priceInsight.days >= 3 && x.priceInsight.isLowest);
+      const sortLabel = $("sortBy").selectedOptions[0].textContent.replace(/^เรียง:\s*/, "");
+      const img = u => u ? esc(displayImg(u).replace(/([?&])width=\d+/, "$1width=300")) : "";
+      const pct = (a, b) => Math.round((a - b) / b * 100);
+
+      // สรุปภาพรวมตลาด (สร้างจากข้อมูลจริงในผลค้นหา)
+      const insights = [];
+      if (best) insights.push(`รุ่นที่ใกล้เคียงที่สุดคือ <b>${esc(best.brand)} ${esc(best.title)}</b> (${best.matchScore}%) ราคา ${best.price ? baht(best.price) : "ไม่พบราคา"}`);
+      if (cheapest && priciest) insights.push(`ราคาคู่แข่งอยู่ระหว่าง <b>${baht(cheapest.price)}</b> (${esc(cheapest.brand)}) ถึง <b>${baht(priciest.price)}</b> (${esc(priciest.brand)}) · ราคากลาง ${baht(median)} · เฉลี่ย ${baht(avg)}`);
+      insights.push(onSale.length
+        ? `กำลังลดราคา <b>${onSale.length} จาก ${items.length} รุ่น</b> · ลดสูงสุด ${discountOf(onSale[0])}% (${esc(onSale[0].brand)} ${esc(onSale[0].title)})`
+        : `ไม่มีรุ่นใดกำลังลดราคาในขณะที่ตรวจ`);
+      if (lowest30.length) insights.push(`ราคาต่ำสุดในรอบ 30 วัน: ${lowest30.map(x => esc(x.brand) + " " + esc(x.title)).join(", ")}`);
+      if (our && median) {
+        const cheaper = prices.filter(p => p < our).length;
+        insights.push(`ราคาของเรา <b>${baht(our)}</b> ${our > median ? "สูงกว่า" : our < median ? "ต่ำกว่า" : "เท่ากับ"}ราคากลาง ${Math.abs(pct(our, median))}% · มีคู่แข่ง ${cheaper} จาก ${prices.length} รุ่นที่ราคาถูกกว่าเรา`);
+      }
+
+      const tiles = [
+        ["แบรนด์ / รุ่น", `${brands.length} / ${items.length}`],
+        ["ช่วงราคา", prices.length ? `${baht(prices[0])} – ${baht(prices[prices.length - 1])}` : "-"],
+        ["ราคากลาง", median ? baht(median) : "-"],
+        ["กำลังลดราคา", `${onSale.length} รุ่น`],
+        ["ราคาของเรา vs ราคากลาง", our && median ? `${our > median ? "+" : ""}${pct(our, median)}%` : "-"]
+      ];
+
+      const rows = items.map((x, i) => {
+        const d = discountOf(x), pi = x.priceInsight;
+        const insight = pi && pi.days >= 3
+          ? (pi.isLowest ? "ต่ำสุด 30 วัน" : `ต่ำสุด ${baht(pi.min30)}`) + (pi.changeFromPrev ? ` · ${pi.changeFromPrev > 0 ? "▲" : "▼"}${Math.abs(pi.changeFromPrev)}%` : "")
+          : "–";
+        const vs = our && x.price ? pct(x.price, our) : null;
+        return `<tr>
+          <td class="c">${i + 1}</td>
+          <td><div class="th">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}</div></td>
+          <td><b>${esc(x.brand)}</b><div>${esc(x.title)}</div><div class="mut">${esc(x.code || "")}</div></td>
+          <td class="c"><b>${x.matchScore}%</b><div class="mut">รูป ${x.imageScore ?? "-"} · ราย ${x.textScore ?? "-"}</div></td>
+          <td class="r"><b>${x.price ? baht(x.price) : "–"}</b>${x.compareAt ? `<div class="mut s">${baht(x.compareAt)}</div>` : ""}</td>
+          <td class="c">${d ? `<span class="tag red">-${d}%</span>` : "–"}</td>
+          <td>${esc(x.promoName || "–")}</td>
+          <td class="c">${insight}</td>
+          <td class="c">${vs == null ? "–" : `<span class="${vs < 0 ? "amb" : "sky"}">${vs > 0 ? "+" : ""}${vs}%</span>`}</td>
+          <td class="c">${x.url ? `<a href="${esc(x.url)}">เปิด</a>` : "–"}</td>
+        </tr>`;
+      }).join("");
+
+      const cards = items.map((x, i) => `
+        <div class="card">
+          <div class="cimg">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}<span class="rank">${i + 1}</span><span class="sc" style="border-color:${scoreColor(x.matchScore)}">${x.matchScore}%</span></div>
+          <div class="cb">
+            <div class="br">${esc(x.brand)}</div>
+            <div class="tt">${esc(x.title)}</div>
+            <div class="pr">${x.price ? baht(x.price) : "ไม่พบราคา"} ${x.compareAt ? `<s>${baht(x.compareAt)}</s>` : ""} ${discountOf(x) ? `<span class="tag red">-${discountOf(x)}%</span>` : ""}</div>
+            ${x.promoName ? `<div class="promo">🏷️ ${esc(x.promoName)}</div>` : ""}
+            ${x.similar ? `<div class="sm"><b class="g">เหมือน</b> ${esc(x.similar)}</div>` : ""}
+            ${x.different ? `<div class="sm"><b class="o">ต่าง</b> ${esc(x.different)}</div>` : ""}
+            <div class="mut s">${esc(x.code || "")} · ${esc(x.source || "")}</div>
+          </div>
+        </div>`).join("");
+
+      const cov = (r.coverage || []);
+      const missing = cov.filter(c => !c.shown).map(c => c.brand);
+      const notes = (r.warnings || []).filter(w => !/^ไม่พบสินค้าที่ยืนยันได้จาก/.test(w));
+      const refImg = selectedBase64Image ? `<img class="refimg" src="${selectedBase64Image}">` : `<div class="refimg noimg">ไม่มีรูปอ้างอิง</div>`;
+      const fileDate = now.toISOString().slice(0, 10);
+
+      return `<!doctype html><html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Competitor-Report-${fileDate}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 12mm 10mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: 'Sarabun', system-ui, sans-serif; color: #0f172a; font-size: 11px; margin: 0; background: #f1f5f9; }
+  .page { max-width: 190mm; margin: 0 auto; background: #fff; padding: 8mm; }
+  .bar { position: sticky; top: 0; background: #0f172a; color: #fff; padding: 10px 16px; display: flex; gap: 12px; align-items: center; justify-content: center; font-size: 13px; z-index: 5; }
+  .bar button { background: #2563eb; color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  .hd { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #1d4ed8; padding-bottom: 8px; margin-bottom: 12px; }
+  .hd h1 { font-size: 20px; margin: 0; } .hd .sub { color: #475569; font-size: 11px; }
+  .hd .meta { text-align: right; font-size: 10.5px; color: #475569; line-height: 1.5; }
+  h2 { font-size: 13.5px; margin: 16px 0 8px; padding-left: 8px; border-left: 4px solid #1d4ed8; }
+  .ref { display: flex; gap: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; }
+  .refimg { width: 110px; height: 130px; object-fit: contain; background: #fff; border: 2px solid #dc2626; border-radius: 8px; flex: none; }
+  .noimg { display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 10px; border-style: dashed; }
+  .ref .k { color: #64748b; font-size: 10px; } .ref .v { font-size: 12px; margin-bottom: 5px; }
+  .chip { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 999px; padding: 1px 8px; margin: 0 3px 3px 0; font-size: 10px; }
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .tile { border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 8px; } .tile .k { color: #64748b; font-size: 9.5px; } .tile .v { font-size: 14px; font-weight: 700; }
+  ul.ins { margin: 0; padding-left: 18px; line-height: 1.65; font-size: 11.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  th { background: #1e293b; color: #fff; font-weight: 600; padding: 5px 4px; text-align: left; }
+  td { border-bottom: 1px solid #e2e8f0; padding: 4px; vertical-align: middle; }
+  tr { page-break-inside: avoid; } tr:nth-child(even) td { background: #f8fafc; }
+  .c { text-align: center; } .r { text-align: right; white-space: nowrap; }
+  .th { width: 44px; height: 52px; display: flex; align-items: center; justify-content: center; }
+  .th img { max-width: 44px; max-height: 52px; object-fit: contain; }
+  .mut { color: #64748b; } .s { font-size: 9px; } s { color: #94a3b8; }
+  .tag { display: inline-block; border-radius: 4px; padding: 0 5px; font-weight: 700; font-size: 9.5px; }
+  .red { background: #ffe4e6; color: #be123c; } .amb { color: #b45309; font-weight: 600; } .sky { color: #0369a1; font-weight: 600; }
+  a { color: #1d4ed8; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .card { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; page-break-inside: avoid; break-inside: avoid; }
+  .cimg { position: relative; height: 150px; background: #f8fafc; display: flex; align-items: center; justify-content: center; }
+  .cimg img { max-width: 100%; max-height: 150px; object-fit: contain; }
+  .rank { position: absolute; left: 6px; top: 6px; background: #0f172a; color: #fff; border-radius: 999px; width: 20px; height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .sc { position: absolute; right: 6px; top: 6px; background: #fff; border: 2px solid #10b981; border-radius: 999px; padding: 1px 6px; font-weight: 700; font-size: 10px; }
+  .cb { padding: 7px 8px; line-height: 1.45; }
+  .br { font-size: 9.5px; font-weight: 700; color: #1d4ed8; text-transform: uppercase; letter-spacing: .03em; }
+  .tt { font-weight: 600; font-size: 11px; } .pr { font-size: 13px; font-weight: 700; margin: 2px 0; }
+  .promo { background: #fef3c7; color: #92400e; border-radius: 5px; padding: 2px 6px; font-size: 9.5px; margin: 3px 0; }
+  .sm { font-size: 9.5px; } .g { color: #047857; } .o { color: #c2410c; }
+  .foot { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 8px; color: #64748b; font-size: 9.5px; line-height: 1.6; }
+  .pb { page-break-before: always; break-before: page; }
+  @media print { body { background: #fff; } .bar { display: none; } .page { padding: 0; max-width: none; } }
+</style></head><body>
+<div class="bar"><span>ตรวจดูรายงาน แล้วกดปุ่มนี้ → เลือกปลายทาง "บันทึกเป็น PDF / Save as PDF"</span><button onclick="window.print()">บันทึกเป็น PDF</button></div>
+<div class="page">
+  <div class="hd">
+    <div><h1>รายงานเปรียบเทียบสินค้าคู่แข่ง</h1><div class="sub">Competitor Product &amp; Price Report · Product Intelligence</div></div>
+    <div class="meta">วันที่ตรวจ ${dateTh} เวลา ${timeTh} น.<br>มุมมอง: ${viewMode === "all" ? "แสดงทั้งหมด" : "แบรนด์ละ 1 รุ่น"} · เรียง: ${esc(sortLabel)}${$("saleOnly").checked ? " · เฉพาะที่ลดราคา" : ""}${hiddenBrands.size ? `<br>ซ่อนแบรนด์: ${esc([...hiddenBrands].join(", "))}` : ""}</div>
+  </div>
+
+  <h2>1. สินค้าอ้างอิง</h2>
+  <div class="ref">${refImg}
+    <div>
+      <div class="k">คำค้น / รายละเอียดที่ระบุ</div><div class="v">${esc($("searchInput").value.trim() || "– (ค้นจากรูปอย่างเดียว)")}</div>
+      <div class="k">ผลวิเคราะห์ของ AI</div><div class="v">${esc(ref.summary || "-")}</div>
+      <div>${(ref.features || []).map(f => `<span class="chip">${esc(f)}</span>`).join("")}</div>
+      ${our ? `<div class="k" style="margin-top:4px">ราคาสินค้าของเรา</div><div class="v"><b>${baht(our)}</b></div>` : ""}
+    </div>
+  </div>
+
+  <h2>2. ภาพรวมตลาด</h2>
+  <div class="tiles">${tiles.map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}</div>
+  <ul class="ins" style="margin-top:8px">${insights.map(t => `<li>${t}</li>`).join("")}</ul>
+
+  <h2>3. ตารางเปรียบเทียบ (${items.length} รุ่น)</h2>
+  <table><thead><tr><th class="c">#</th><th>รูป</th><th>แบรนด์ / รุ่น</th><th class="c">ใกล้เคียง</th><th class="r">ราคา</th><th class="c">ส่วนลด</th><th>โปรโมชั่น</th><th class="c">ราคา 30 วัน</th><th class="c">vs เรา</th><th class="c">ลิงก์</th></tr></thead>
+  <tbody>${rows || `<tr><td colspan="10" class="c mut">ไม่มีข้อมูล</td></tr>`}</tbody></table>
+
+  <h2 class="pb">4. รายละเอียดรายรุ่น</h2>
+  <div class="cards">${cards}</div>
+
+  <div class="foot">
+    <b>แบรนด์ที่ค้น:</b> ${cov.map(c => (c.shown ? "✓ " : "– ") + esc(c.brand)).join(" · ") || "-"}
+    ${missing.length ? `<br><b>ยังไม่พบข้อมูล:</b> ${esc(missing.join(", "))} (เพิ่มสินค้าได้ใน Google Sheet แท็บ Catalog)` : ""}
+    ${notes.length ? `<br><b>หมายเหตุจากระบบ:</b> ${notes.map(esc).join(" · ")}` : ""}
+    <br>ความใกล้เคียง = รูป 70% + รายละเอียด 30% ประเมินโดย AI · ราคาและโปรโมชั่นดึงจากเว็บ official ของแต่ละแบรนด์และข้อมูลที่ทีมกรอก ณ เวลาที่ตรวจ อาจเปลี่ยนแปลงได้
+  </div>
+</div>
+<script>
+  (function () {
+    const imgs = [...document.images];
+    const wait = Promise.all(imgs.map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; })));
+    const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+    Promise.race([Promise.all([wait, fonts]), new Promise(r => setTimeout(r, 6000))])
+      .then(() => setTimeout(() => window.print(), 300));
+  })();
+<\/script>
+</body></html>`;
+    }
+
+    function exportPdf() {
+      if (!lastResult || !currentItems().length) return;
+      const html = buildReportHtml();
+      const w = window.open("", "_blank");
+      if (w) { w.document.open(); w.document.write(html); w.document.close(); return; }
+      // popup ถูกบล็อก → ดาวน์โหลดเป็นไฟล์ HTML แทน (เปิดแล้วกดบันทึกเป็น PDF ได้)
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+      a.download = "competitor-report-" + new Date().toISOString().slice(0, 10) + ".html";
+      a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    /* ---------------- export ---------------- */
+    function exportCsv() {
+      const items = currentItems();
+      if (!items.length) return;
+      const our = +$("ourPrice").value || "";
+      const head = ["แบรนด์", "ชื่อรุ่น", "รหัส", "ความใกล้เคียง %", "คะแนนรูป %", "คะแนนรายละเอียด %", "ราคาขาย", "ราคาปกติ", "ส่วนลด %",
+                    "ราคาต่ำสุด 30 วัน", "ต่างจากราคาเรา %", "โปรโมชั่น", "จุดที่เหมือน", "จุดที่ต่าง", "แหล่งข้อมูล", "ลิงก์", "วันที่ตรวจ"];
+      const today = new Date().toLocaleDateString("th-TH");
+      const rows = items.map(x => [x.brand, x.title, x.code || "", x.matchScore, x.imageScore ?? "", x.textScore ?? "", x.price ?? "", x.compareAt ?? "",
+        discountOf(x) || "", x.priceInsight ? x.priceInsight.min30 : "", our && x.price ? Math.round((x.price - our) / our * 100) : "",
+        x.promoName || "", x.similar || "", x.different || "", x.source || "", x.url || "", today]);
+      const csv = "﻿" + [head].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      a.download = "competitor-" + new Date().toISOString().slice(0, 10) + ".csv";
+      a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
   </script>
 </body>
