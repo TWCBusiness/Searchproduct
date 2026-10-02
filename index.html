@@ -272,7 +272,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "5.11";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "5.12";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -290,14 +290,38 @@
     function cacheSet(k, v) { memCache.set(k, { t: Date.now(), v }); try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), v })); } catch (e) {} }
 
     /* ---------------- API ---------------- */
-    async function callApi(payload) {
+    let recoverNote = "";
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    async function post(payload) {
       const res = await fetch(GAS_API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
-      const raw = await res.text();
-      let r;
+      return { res, raw: await res.text() };
+    }
+    /** การเชื่อมต่อหลุดระหว่างรอ (Apps Script ตอบ 404/ไม่ใช่ JSON ทั้งที่ยังทำงานอยู่) → ถามผลด้วยรหัสคำขอ (ไม่ประมวลผลซ้ำ ไม่เปลืองโควตา) */
+    async function recover(rid, token, elapsedMs) {
+      const tries = elapsedMs < 30000 ? 4 : 24;   // หลุดเร็ว = น่าจะไม่ได้เริ่มทำงาน → รอสั้นๆ / หลุดช้า = น่าจะกำลังทำอยู่ → รอได้ถึง ~4 นาที
+      for (let i = 0; i < tries; i++) {
+        recoverNote = " · การเชื่อมต่อหลุด รอผลจากเซิร์ฟเวอร์ " + (i + 1) + "/" + tries;
+        await sleep(10000);
+        try {
+          const { raw } = await post({ peek: true, rid, token });
+          const r = JSON.parse(raw);
+          if (r && r.status === "success") return r;
+          if (r && r.status === "error") return r;
+        } catch (e) { /* ลองต่อ */ }
+      }
+      return null;
+    }
+    async function callApi(payload) {
+      const rid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+      const t0 = Date.now();
+      let res = null, raw = "", r;
+      try { ({ res, raw } = await post(Object.assign({ rid }, payload))); } catch (e) { raw = ""; }
+      try { r = JSON.parse(raw); } catch (e) { r = null; }
+      if (!r) { r = await recover(rid, payload.token || "", Date.now() - t0); if (r) { raw = JSON.stringify(r); res = res || { status: 200 }; } }
       try { r = JSON.parse(raw); }
       catch (e) {
         const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
-        throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + res.status + "): " + (txt || "ไม่มีข้อความ") + " — ตรวจ Deploy (New version, Who has access = Anyone)");
+        throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + (res ? res.status : "เชื่อมต่อไม่ได้") + "): " + (txt || "ไม่มีข้อความ") + " — ตรวจ Deploy (New version, Who has access = Anyone)");
       }
       if (r.status !== "success") { const err = new Error(r.message || "เกิดข้อผิดพลาด"); err.code = r.code; throw err; }
       return r;
@@ -307,12 +331,12 @@
     const STEPS = [[0, "AI วิเคราะห์รูปอ้างอิง"], [5, "ดึงแคตตาล็อกคู่แข่ง"], [12, "โหลดรูปผู้สมัคร"], [16, "เทียบรูปทรง + วิเคราะห์รายละเอียด"]];
     let progTimer = null;
     function startProgress() {
-      const t0 = Date.now();
+      const t0 = Date.now(); recoverNote = "";
       ["resultSection", "errorSection", "emptyState"].forEach(id => $(id).classList.add("hidden"));
       $("progressSection").classList.remove("hidden");
       const paint = () => {
         const sec = Math.floor((Date.now() - t0) / 1000);
-        $("progressSec").textContent = "(" + sec + " วินาที)";
+        $("progressSec").textContent = "(" + sec + " วินาที" + recoverNote + ")";
         const cur = STEPS.filter(s => sec >= s[0]).length - 1;
         $("stepList").innerHTML = STEPS.map((s, i) => {
           const st = i < cur ? "done" : i === cur ? "now" : "todo";
