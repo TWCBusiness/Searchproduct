@@ -206,7 +206,7 @@
     let viewMode = store.get("pis_view", "best") === "all" ? "all" : "best";
     let hiddenBrands = new Set();
     let offKeys = new Set(), serverRelax = [], lastQuery = "";
-    const WEAK_MIN = 50, WEAK_GAP = 20;   // โหมดทั้งหมด: รุ่นที่ได้ต่ำกว่า 50% หรือห่างจากรุ่นดีสุดของแบรนด์เกิน 20 คะแนน → พับไว้
+    const WEAK_MIN = 40, WEAK_GAP = 25;   // โหมดทั้งหมด: รุ่นที่ได้ต่ำกว่า 50% หรือห่างจากรุ่นดีสุดของแบรนด์เกิน 20 คะแนน → พับไว้
 
     /* ---------------- status / warm-up ---------------- */
     window.addEventListener("load", () => {
@@ -367,10 +367,18 @@
       if (!lastResult) return { main: [], weak: [], bad: [] };
       const act = activeKeys();
       let pool = ((lastResult.all || []).length ? lastResult.all : (lastResult.data || [])).slice();
+      // คะแนนหลังหักเงื่อนไข: คำนวณใหม่ตามชิปที่เปิดอยู่ (รูปมาก่อน ข้อความเป็นตัวหักเล็กน้อย)
+      pool = pool.map(x => {
+        if (x.rawScore == null) return x;
+        const pen = Math.min(30, Object.keys(x.pen || {}).filter(k => act.has(k)).reduce((n, k) => n + x.pen[k], 0));
+        return Object.assign({}, x, { matchScore: Math.max(0, x.rawScore - pen) });
+      });
       pool = pool.filter(x => !hiddenBrands.has(x.brand));
       if ($("saleOnly").checked) pool = pool.filter(x => discountOf(x) > 0);
-      const bad = pool.filter(x => failsOf(x, act).length);
-      const ok = pool.filter(x => !failsOf(x, act).length);
+      const hasImgRef = !!(lastResult.reference && lastResult.reference.hasImage);
+      // มีรูป: ไม่ซ่อนรุ่นที่ขัดเงื่อนไข (แค่หักคะแนนและติดป้าย ✗) / ไม่มีรูป: แยกไปกลุ่มพับ
+      const bad = hasImgRef ? [] : pool.filter(x => failsOf(x, act).length);
+      const ok = hasImgRef ? pool : pool.filter(x => !failsOf(x, act).length);
       const best = {};
       ok.forEach(x => { if (!best[x.brand] || x.matchScore > best[x.brand].matchScore) best[x.brand] = x; });
       let main, weak = [];
