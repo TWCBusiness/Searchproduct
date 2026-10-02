@@ -272,7 +272,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "5.9";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "5.11";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -373,6 +373,7 @@
       $("queryEcho").innerHTML = echoed !== typedNow
         ? `<span class="text-rose-600 font-semibold">⚠ ผลนี้เป็นของคำค้น “${esc(echoed) || "(รูปอย่างเดียว)"}” ไม่ตรงกับที่กรอก — กดค้นหาอีกครั้ง</span>`
         : (echoed ? `ค้นด้วยข้อความ: “${esc(echoed)}”` : "ค้นจากรูปอย่างเดียว (ไม่ได้พิมพ์รายละเอียด)");
+      if (r.tookMs) $("queryEcho").innerHTML += ` · <span title="${esc(JSON.stringify(r.timing || {}))}">⏱ เซิร์ฟเวอร์ใช้ ${(r.tookMs / 1000).toFixed(0)} วิ</span>`;
       $("refFeatures").innerHTML = (ref.features || []).map(f => `<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs">${esc(f)}</span>`).join("")
         + (ref.wired && ref.wired !== "unknown" ? `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs">${ref.wired === "wireless" ? "ไร้โครง" : "มีโครง"}</span>` : "");
       if (selectedBase64Image) { $("refThumb").src = selectedBase64Image; $("refThumb").classList.remove("hidden"); } else $("refThumb").classList.add("hidden");
