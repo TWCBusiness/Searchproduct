@@ -293,7 +293,7 @@
     }
 
     /* ---------------- progress ---------------- */
-    const STEPS = [[0, "วิเคราะห์รูปสินค้า"], [5, "ดึงแคตตาล็อกคู่แข่ง"], [12, "โหลดรูปผู้สมัคร"], [16, "AI เทียบรูปทีละแบรนด์"]];
+    const STEPS = [[0, "AI วิเคราะห์รูปอ้างอิง"], [5, "ดึงแคตตาล็อกคู่แข่ง"], [12, "โหลดรูปผู้สมัคร"], [16, "เทียบรูปทรง + วิเคราะห์รายละเอียด"]];
     let progTimer = null;
     function startProgress() {
       const t0 = Date.now();
@@ -546,8 +546,9 @@
             <div class="flex flex-wrap gap-1">${insightBadges(x)}</div>
             ${(() => { const cb = constraintBadges(x); return cb ? `<div class="flex flex-wrap gap-1">${cb}</div>` : ""; })()}
             ${x.promoName ? `<p class="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5">🏷️ ${esc(x.promoName)}</p>` : ""}
-            ${x.similar ? `<p class="text-xs text-slate-600"><span class="text-emerald-600 font-semibold">เหมือน</span> ${esc(x.similar)}</p>` : ""}
-            ${x.different ? `<p class="text-xs text-slate-600"><span class="text-amber-600 font-semibold">ต่าง</span> ${esc(x.different)}</p>` : ""}
+            ${x.similar ? `<p class="text-xs text-slate-600"><span class="text-emerald-600 font-semibold">รูปทรงเหมือน</span> ${esc(x.similar)}</p>` : ""}
+            ${x.different ? `<p class="text-xs text-slate-600"><span class="text-amber-600 font-semibold">รูปทรงต่าง</span> ${esc(x.different)}</p>` : ""}
+            ${x.detail ? `<p class="text-xs text-slate-600 bg-slate-50 rounded-lg px-2.5 py-1.5"><span class="text-blue-600 font-semibold">AI วิเคราะห์รายละเอียด</span> ${esc(x.detail)}</p>` : ""}
           </div>
           <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span class="text-slate-400 truncate" title="${esc(x.source)}">${esc(x.code || "")}${x.code ? " · " : ""}${esc(x.source)}</span>
@@ -658,8 +659,9 @@
             <div class="tt">${esc(x.title)}</div>
             <div class="pr">${x.price ? baht(x.price) : "ไม่พบราคา"} ${x.compareAt ? `<s>${baht(x.compareAt)}</s>` : ""} ${discountOf(x) ? `<span class="tag red">-${discountOf(x)}%</span>` : ""}</div>
             ${x.promoName ? `<div class="promo">🏷️ ${esc(x.promoName)}</div>` : ""}
-            ${x.similar ? `<div class="sm"><b class="g">เหมือน</b> ${esc(x.similar)}</div>` : ""}
-            ${x.different ? `<div class="sm"><b class="o">ต่าง</b> ${esc(x.different)}</div>` : ""}
+            ${x.similar ? `<div class="sm"><b class="g">รูปทรงเหมือน</b> ${esc(x.similar)}</div>` : ""}
+            ${x.different ? `<div class="sm"><b class="o">รูปทรงต่าง</b> ${esc(x.different)}</div>` : ""}
+            ${x.detail ? `<div class="sm"><b style="color:#1d4ed8">รายละเอียด (AI)</b> ${esc(x.detail)}</div>` : ""}
             <div class="mut s">${esc(x.code || "")} · ${esc(x.source || "")}</div>
           </div>
         </div>`).join("");
@@ -785,11 +787,11 @@
       if (!items.length) return;
       const our = +$("ourPrice").value || "";
       const head = ["แบรนด์", "ชื่อรุ่น", "รหัส", "ความใกล้เคียง %", "คะแนนรูป %", "คะแนนรายละเอียด %", "ราคาขาย", "ราคาปกติ", "ส่วนลด %",
-                    "ราคาต่ำสุด 30 วัน", "ต่างจากราคาเรา %", "โปรโมชั่น", "จุดที่เหมือน", "จุดที่ต่าง", "แหล่งข้อมูล", "ลิงก์", "วันที่ตรวจ"];
+                    "ราคาต่ำสุด 30 วัน", "ต่างจากราคาเรา %", "โปรโมชั่น", "รูปทรงที่เหมือน", "รูปทรงที่ต่าง", "AI วิเคราะห์รายละเอียด", "แหล่งข้อมูล", "ลิงก์", "วันที่ตรวจ"];
       const today = new Date().toLocaleDateString("th-TH");
       const rows = items.map(x => [x.brand, x.title, x.code || "", x.matchScore, x.imageScore ?? "", x.textScore ?? "", x.price ?? "", x.compareAt ?? "",
         discountOf(x) || "", x.priceInsight ? x.priceInsight.min30 : "", our && x.price ? Math.round((x.price - our) / our * 100) : "",
-        x.promoName || "", x.similar || "", x.different || "", x.source || "", x.url || "", today]);
+        x.promoName || "", x.similar || "", x.different || "", x.detail || "", x.source || "", x.url || "", today]);
       const csv = "﻿" + [head].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
