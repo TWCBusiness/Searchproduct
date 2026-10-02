@@ -220,7 +220,7 @@
     });
 
     /* ---------------- quick chips ---------------- */
-    const CHIPS = ["บราไร้โครง", "ฟองน้ำบาง", "ดันทรง", "ลูกไม้", "ไร้ตะเข็บ", "สปอร์ตบรา", "สีดำ", "สีเนื้อ"];
+    const CHIPS = ["บราไร้โครง", "ฟองน้ำบาง", "ดันทรง", "มีตะขอ", "ไม่เอาสวมหัว", "สวมหัว", "ลูกไม้", "ไร้ตะเข็บ", "เกาะอก", "สปอร์ตบรา", "สีดำ", "สีเนื้อ"];
     function renderChips() {
       $("quickChips").innerHTML = CHIPS.map(c =>
         `<button type="button" onclick="addChip('${c}')" class="px-2.5 py-1 rounded-full text-xs border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50">+ ${c}</button>`).join("");
@@ -271,7 +271,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "5.5";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "5.7";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -398,8 +398,11 @@
       if ($("saleOnly").checked) pool = pool.filter(x => discountOf(x) > 0);
       const hasImgRef = !!(lastResult.reference && lastResult.reference.hasImage);
       // มีรูป: ไม่ซ่อนรุ่นที่ขัดเงื่อนไข (แค่หักคะแนนและติดป้าย ✗) / ไม่มีรูป: แยกไปกลุ่มพับ
-      const bad = hasImgRef ? [] : pool.filter(x => failsOf(x, act).length);
-      const ok = hasImgRef ? pool : pool.filter(x => !failsOf(x, act).length);
+      // เงื่อนไขหลัก (เช่น เกาะอก ที่ผู้ใช้พิมพ์เอง) = ประเภทสินค้า → รุ่นที่ไม่ตรงแยกไปกลุ่มพับเสมอ แม้มีรูป
+      const coreKeys = new Set(constraintsOf().filter(k => k.core).map(k => k.key));
+      const isBad = x => failsOf(x, act).some(k => !hasImgRef || coreKeys.has(k));
+      const bad = pool.filter(isBad);
+      const ok = pool.filter(x => !isBad(x));
       const best = {};
       ok.forEach(x => { if (!best[x.brand] || x.matchScore > best[x.brand].matchScore) best[x.brand] = x; });
       let main, weak = [];
