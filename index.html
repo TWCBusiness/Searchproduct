@@ -344,7 +344,7 @@
 
     /* ---------------- image: click / drag / paste ---------------- */
     function applyImage(dataUrl) {
-      selectedBase64Image = dataUrl;
+      selectedBase64Image = dataUrl; autoPrev = false;
       $("imagePreview").src = dataUrl;
       $("imagePreview").classList.remove("hidden"); $("removeImgBtn").classList.remove("hidden"); $("dropHint").classList.add("hidden");
     }
@@ -366,7 +366,7 @@
     }
     function handleImageSelect(ev) { loadImageFile(ev.target.files[0]); }
     function removeSelectedImage() {
-      selectedBase64Image = null; $("imageUpload").value = "";
+      selectedBase64Image = null; autoPrev = false; $("imageUpload").value = "";
       $("imagePreview").classList.add("hidden"); $("removeImgBtn").classList.add("hidden"); $("dropHint").classList.remove("hidden");
     }
     const dz = document.getElementById("dropZone");
@@ -389,7 +389,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.6";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.7";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -629,6 +629,8 @@
       // ปิดเงื่อนไขที่เซิร์ฟเวอร์ตัดสินค้าออกไปตั้งแต่ต้น → เสนอค้นใหม่เพื่อดึงรุ่นเหล่านั้นกลับมา
       const need = cons.filter(k => offKeys.has(k.key) && serverRelax.indexOf(k.key) < 0 && fo[k.key]);
       const ai = lastResult.autoImage;
+      if (ai && ai.imageUrl && !selectedBase64Image) showAutoPreview(ai.imageUrl);
+      else if (!ai && autoPrev) removeSelectedImage();
       $("autoImgBox").innerHTML = ai ? `<div class="bg-white border border-blue-200 rounded-2xl p-2.5 flex items-center gap-3 text-sm">
           <img src="${esc(ai.imageUrl)}" class="w-14 h-14 rounded-lg object-cover border border-slate-200" alt="" referrerpolicy="no-referrer">
           <span class="flex-1 text-slate-700">ไม่ได้ใส่รูป — ระบบใช้รูปจาก<b>แคตตาล็อก Wacoal</b> รุ่น <b>${esc(ai.code)}</b> เป็นรูปอ้างอิง <span class="text-slate-400">(${esc(ai.title)})</span></span>
@@ -1311,12 +1313,23 @@
         if (!d.length) { box.classList.add("hidden"); return; }
         box.classList.remove("hidden");
         box.innerHTML = `<p class="text-[11px] text-slate-500 mb-1">รุ่น Wacoal ที่ใกล้เคียง <span class="text-slate-400">(จากแคตตาล็อก — กดเพื่อใช้รหัสรุ่นนี้ ระบบจะใช้รูปรุ่นนั้นเป็นรูปอ้างอิง)</span></p>
-          <div class="flex gap-2 overflow-x-auto pb-1">${d.map(x => `<button type="button" data-code="${esc(x.code)}" onclick="pickSuggest(this.dataset.code)" class="shrink-0 flex items-center gap-2 border border-slate-200 bg-white hover:border-blue-400 rounded-xl p-1.5 pr-3 text-left max-w-[15rem]">
+          <div class="flex gap-2 overflow-x-auto pb-1">${d.map(x => `<button type="button" data-code="${esc(x.code)}" data-img="${esc(x.imageUrl)}" onclick="pickSuggest(this.dataset.code, this.dataset.img)" class="shrink-0 flex items-center gap-2 border border-slate-200 bg-white hover:border-blue-400 rounded-xl p-1.5 pr-3 text-left max-w-[15rem]">
             <img src="${esc(x.imageUrl)}" referrerpolicy="no-referrer" class="w-10 h-10 rounded-lg object-cover bg-slate-50" onerror="this.style.visibility='hidden'">
             <span class="min-w-0"><b class="block text-xs text-slate-800">${esc(x.code)}${x.price ? ` <span class="font-normal text-slate-500">฿${Number(x.price).toLocaleString()}</span>` : ""}</b><span class="block text-[11px] text-slate-500 truncate">${esc(x.title)}</span></span></button>`).join("")}</div>`;
       }).catch(() => {});
     }
-    function pickSuggest(code) { $("searchInput").value = code; sugLast = code; $("suggestBox").classList.add("hidden"); }
+    let autoPrev = false;
+    function showAutoPreview(url) {   // แสดงรูปในกรอบอ้างอิงอย่างเดียว (ยังไม่ได้ส่งรูปจากเบราว์เซอร์ — เซิร์ฟเวอร์ใช้รูปรุ่นนี้เองตอนค้น)
+      if (!url || selectedBase64Image) return; autoPrev = true; const im = $("imagePreview"); im.src = url; im.referrerPolicy = "no-referrer";
+      im.classList.remove("hidden"); $("removeImgBtn").classList.remove("hidden"); $("dropHint").classList.add("hidden");
+    }
+    function pickSuggest(code, imgUrl) {
+      $("searchInput").value = code; sugLast = code; $("suggestBox").classList.add("hidden");
+      if (!imgUrl) return; showAutoPreview(imgUrl);   // เห็นรูปทันที แล้วพยายามโหลดเป็นรูปอ้างอิงจริง
+      fetch(imgUrl).then(r => { if (!r.ok) throw 0; return r.blob(); })
+        .then(b => { if ($("searchInput").value.trim() !== code) return; autoPrev = false; selectedBase64Image = null; loadImageFile(new File([b], "ref.jpg", { type: b.type || "image/jpeg" })); })
+        .catch(() => {});   // โหลดไม่ได้ (CORS) → คงพรีวิวไว้ ให้เซิร์ฟเวอร์ใช้รูปจากแคตตาล็อกตอนค้น
+    }
     /* ประวัติ + ชุดเงื่อนไข (เก็บในเบราว์เซอร์นี้เท่านั้น) */
     let hist = [], presets = [];
     try { hist = JSON.parse(store.get("pis_hist", "[]")) || []; presets = JSON.parse(store.get("pis_presets", "[]")) || []; } catch (e) {}
