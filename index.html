@@ -398,7 +398,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.12";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.13";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -596,9 +596,12 @@
       updateTray(); if (curTab !== "search") renderTab();
       const grid = $("resultGrid");
       if (!items.length) grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm">ไม่มีสินค้าที่ตรงเงื่อนไขและตัวกรองที่เลือก${g.bad.length ? " · ลองปิดเงื่อนไขบางข้อด้านบน" : ""}</div>`;
-      else if (viewMode === "all" && $("sortBy").value === "score") grid.innerHTML = renderGrouped(items);
-      else grid.innerHTML = items.map(cardHtml).join("");
-      const sim = g.ourSim || [];
+      else {
+        const shown = sortItems(items.concat(g.ourSim || []));   // รุ่น Wacoal ที่คล้ายกันอยู่รวมกับ Wacoal หลัก (Wacoal มาก่อนเสมอ)
+        if (viewMode === "all" && $("sortBy").value === "score") grid.innerHTML = renderGrouped(shown);
+        else grid.innerHTML = shown.map(cardHtml).join("");
+      }
+      const sim = [];
       $("similarOur").innerHTML = sim.length ? `<div class="rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/70 to-white p-4 fade-in">
           <div class="flex items-center gap-2 mb-3"><span class="text-base">🌸</span><h3 class="font-bold text-pink-900 text-sm">รุ่น Wacoal ที่คล้ายกัน</h3><span class="text-[11px] text-slate-500">(${sim.length} รุ่น · เรียงตามความเหมือนกับรูปอ้างอิง)</span></div>
           <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">${sim.map(cardHtml).join("")}</div></div>` : "";
