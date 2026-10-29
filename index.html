@@ -36,8 +36,22 @@
   </div>
   <script>
     (function () {
-      var v = ""; try { v = (new URLSearchParams(location.search).get("emp_id") || "").trim(); } catch (e) {}
-      window.EMP_ID = /^[A-Za-z0-9._-]{1,30}$/.test(v) ? v : "";
+      var RE = /^[A-Za-z0-9._-]{1,30}$/, v = "";
+      try {
+        var sp = new URLSearchParams(location.search);
+        v = (sp.get("emp_id") || "").trim();
+        if (RE.test(v)) {
+          try { sessionStorage.setItem("pis_emp_id", v); } catch (e) {}
+        } else {
+          v = ""; try { v = sessionStorage.getItem("pis_emp_id") || ""; } catch (e) {}   // รีเฟรชหน้า → ใช้ค่าที่จำไว้ในแท็บนี้
+        }
+        if (sp.has("emp_id")) {   // ซ่อน emp_id จากแถบ URL (คงพารามิเตอร์อื่นไว้)
+          sp.delete("emp_id");
+          var q = sp.toString();
+          history.replaceState(null, "", location.pathname + (q ? "?" + q : "") + location.hash);
+        }
+      } catch (e) {}
+      window.EMP_ID = RE.test(v) ? v : "";
       if (!window.EMP_ID) {
         window.__DENIED = true;
         document.getElementById("gate").style.display = "flex";
@@ -427,7 +441,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.17";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.18";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
