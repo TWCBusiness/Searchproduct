@@ -32,32 +32,41 @@
       </div>
       <h1 class="text-lg font-bold text-slate-900">ไม่สามารถเข้าใช้งานได้</h1>
       <p class="text-sm text-slate-500 mt-2">กรุณาเปิดผ่านลิงก์ใหม่ <a href="https://twcapp.wacoal.co.th/PerformanceByStore" class="text-pink-600 font-semibold underline">คลิกที่นี่</a></p>
+      <p id="gateWhy" class="text-[11px] text-slate-400 mt-4 break-words"></p>
     </div>
   </div>
   <script>
+    /* ตรวจสิทธิ์แบบลายเซ็น: ลิงก์ต้องมี emp_id + exp + sig (ออกโดยระบบจัดการ User) → ส่ง startSession แลก token
+       แล้วใช้ token ทุกคำขอ · ล้าง query ออกจาก URL ทันที · token เก็บใน sessionStorage (ต่อแท็บ) */
+    var WHY = { nolink: "ลิงก์ไม่มี emp_id/exp/sig (เปิดตรงหรือบุ๊กมาร์กเก่า)", incomplete: "ลิงก์มีพารามิเตอร์ไม่ครบ (ต้องมี emp_id, exp, sig)",
+      expired: "ลิงก์หมดอายุ", used: "ลิงก์นี้ถูกใช้ไปแล้ว", badsig: "ลายเซ็นไม่ถูกต้อง", format: "รูปแบบลิงก์ไม่ถูกต้อง", toolong: "อายุลิงก์ยาวผิดปกติ",
+      notconfigured: "เซิร์ฟเวอร์ยังไม่ได้ตั้ง SECRET", busy: "เซิร์ฟเวอร์ไม่ว่าง ลองใหม่", server: "เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (Code.gs ที่ Deploy อาจเป็นเวอร์ชันเก่า)",
+      network: "เชื่อมต่อ Apps Script ไม่ได้", session: "session หมดอายุ", rejected: "ถูกปฏิเสธ" };
+    window.showDenied = function (why) {
+      window.__DENIED = true;
+      var w = document.getElementById("gateWhy"); if (w && why) w.textContent = "รหัสสาเหตุ: " + why + " — " + (WHY[why] || "");
+      try { console.warn("[access denied]", why); } catch (e) {}
+      var g = document.getElementById("gate"); if (g) g.style.display = "flex";
+      document.body.style.overflow = "hidden";
+      document.title = "ไม่สามารถเข้าใช้งานได้";
+    };
     (function () {
-      var RE = /^[A-Za-z0-9._-]{1,30}$/, v = "";
+      var RE = /^[A-Za-z0-9._-]{1,30}$/, boot = null;
       try {
         var sp = new URLSearchParams(location.search);
-        v = (sp.get("emp_id") || "").trim();
-        if (RE.test(v)) {
-          try { sessionStorage.setItem("pis_emp_id", v); } catch (e) {}
-        } else {
-          v = ""; try { v = sessionStorage.getItem("pis_emp_id") || ""; } catch (e) {}   // รีเฟรชหน้า → ใช้ค่าที่จำไว้ในแท็บนี้
-        }
-        if (sp.has("emp_id")) {   // ซ่อน emp_id จากแถบ URL (คงพารามิเตอร์อื่นไว้)
-          sp.delete("emp_id");
+        var emp = (sp.get("emp_id") || "").trim(), exp = (sp.get("exp") || "").trim(), sig = (sp.get("sig") || "").trim();
+        if (RE.test(emp) && /^\d{1,12}$/.test(exp) && sig && sig.length <= 200) boot = { emp_id: emp, exp: exp, sig: sig };
+        window.__HAD = sp.has("emp_id") || sp.has("exp") || sp.has("sig");
+        if (sp.has("emp_id") || sp.has("exp") || sp.has("sig")) {   // ซ่อน credential จากแถบ URL (คงพารามิเตอร์อื่นไว้)
+          sp.delete("emp_id"); sp.delete("exp"); sp.delete("sig");
           var q = sp.toString();
           history.replaceState(null, "", location.pathname + (q ? "?" + q : "") + location.hash);
         }
       } catch (e) {}
-      window.EMP_ID = RE.test(v) ? v : "";
-      if (!window.EMP_ID) {
-        window.__DENIED = true;
-        document.getElementById("gate").style.display = "flex";
-        document.body.style.overflow = "hidden";
-        document.title = "ไม่สามารถเข้าใช้งานได้";
-      }
+      window.__BOOT = boot;
+      window.TOKEN = ""; window.EMP_ID = "";
+      try { window.TOKEN = sessionStorage.getItem("pis_session") || ""; window.EMP_ID = sessionStorage.getItem("pis_emp") || ""; } catch (e) {}
+      if (!boot && !window.TOKEN) window.showDenied(window.__HAD ? "incomplete" : "nolink");   // ไม่มีลายเซ็นและไม่มี session → เข้าไม่ได้
     })();
   </script>
 
@@ -295,7 +304,7 @@
   </div>
 
   <script>
-    if (window.__DENIED) throw new Error("ไม่พบ emp_id — หยุดการทำงาน");   // ไม่มี emp_id → ไม่รันระบบ ไม่เรียก API
+    if (window.__DENIED) throw new Error("ไม่มีสิทธิ์เข้าใช้งาน — หยุดการทำงาน");   // ไม่มีลายเซ็น/session → ไม่รันระบบ ไม่เรียก API
     document.getElementById("empText").textContent = window.EMP_ID;
     // ⚠️ Web App URL จาก Google Apps Script
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxtcpRhVc6J6X2QKAAWsaSPrn_uBUKDddS340y3sePPlYf9PFKpi5S2uccS8239iwGLUw/exec";
@@ -441,7 +450,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.18";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.20";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -462,9 +471,33 @@
     let recoverNote = "";
     const sleep = ms => new Promise(r => setTimeout(r, ms));
     async function post(payload) {
+      if (window.TOKEN) payload = Object.assign({}, payload, { token: window.TOKEN });   // ทุกคำขอ (รวม peek) ส่ง token
       const res = await fetch(GAS_API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
       return { res, raw: await res.text() };
     }
+    /** ปฏิเสธการเข้าใช้: ล้าง session แล้วแสดงหน้า "ไม่สามารถเข้าใช้งานได้" */
+    function denyAccess(why) {
+      window.TOKEN = ""; window.EMP_ID = "";
+      try { sessionStorage.removeItem("pis_session"); sessionStorage.removeItem("pis_emp"); } catch (e) {}
+      window.showDenied(why);
+    }
+    /** แลกลายเซ็นในลิงก์ (ใช้ได้ครั้งเดียว) เป็น session token — ทุก API รอให้เสร็จก่อน */
+    const authReady = (async () => {
+      const boot = window.__BOOT; window.__BOOT = null;
+      if (!boot) return;                      // ไม่มีลายเซ็นใหม่ → ใช้ token เดิมใน sessionStorage (รีเฟรชหน้า)
+      try {
+        const { raw } = await post({ action: "startSession", emp_id: boot.emp_id, exp: boot.exp, sig: boot.sig });
+        let r = null; try { r = JSON.parse(raw); } catch (e) {}
+        if (r && r.status === "success" && r.token) {
+          window.TOKEN = r.token; window.EMP_ID = String(r.emp || boot.emp_id);
+          try { sessionStorage.setItem("pis_session", window.TOKEN); sessionStorage.setItem("pis_emp", window.EMP_ID); } catch (e) {}
+          $("empText").textContent = window.EMP_ID;
+          return;
+        }
+        return denyAccess(r ? (r.code === "unauthorized" ? (r.reason || "rejected") : "server") : "server");
+      } catch (e) {}
+      denyAccess("network");
+    })();
     /** การเชื่อมต่อหลุดระหว่างรอ (Apps Script ตอบ 404/ไม่ใช่ JSON ทั้งที่ยังทำงานอยู่) → ถามผลด้วยรหัสคำขอ (ไม่ประมวลผลซ้ำ ไม่เปลืองโควตา) */
     async function recover(rid, token, elapsedMs) {
       const tries = elapsedMs < 30000 ? 4 : 24;   // หลุดเร็ว = น่าจะไม่ได้เริ่มทำงาน → รอสั้นๆ / หลุดช้า = น่าจะกำลังทำอยู่ → รอได้ถึง ~4 นาที
@@ -484,14 +517,17 @@
       const rid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
       const t0 = Date.now();
       let res = null, raw = "", r;
-      try { ({ res, raw } = await post(Object.assign({ rid, emp: window.EMP_ID }, payload))); } catch (e) { raw = ""; }
+      await authReady;
+      if (window.__DENIED) { const e = new Error("ไม่มีสิทธิ์เข้าใช้งาน"); e.code = "unauthorized"; throw e; }
+      try { ({ res, raw } = await post(Object.assign({ rid }, payload))); } catch (e) { raw = ""; }
       try { r = JSON.parse(raw); } catch (e) { r = null; }
-      if (!r) { r = await recover(rid, payload.token || "", Date.now() - t0); if (r) { raw = JSON.stringify(r); res = res || { status: 200 }; } }
+      if (!r) { r = await recover(rid, window.TOKEN, Date.now() - t0); if (r) { raw = JSON.stringify(r); res = res || { status: 200 }; } }
       try { r = JSON.parse(raw); }
       catch (e) {
         const txt = raw.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
         throw new Error("Apps Script ไม่ได้ตอบกลับเป็น JSON (HTTP " + (res ? res.status : "เชื่อมต่อไม่ได้") + "): " + (txt || "ไม่มีข้อความ") + " — ตรวจ Deploy (New version, Who has access = Anyone)");
       }
+      if (r.code === "unauthorized") { denyAccess("session"); const e = new Error("session หมดอายุ — กรุณาเข้าใช้งานผ่านระบบจัดการ User ใหม่"); e.code = "unauthorized"; throw e; }
       if (r.status !== "success") { const err = new Error(r.message || "เกิดข้อผิดพลาด"); err.code = r.code; throw err; }
       return r;
     }
