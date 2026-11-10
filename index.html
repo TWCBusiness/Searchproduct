@@ -38,13 +38,13 @@
   <script>
     /* ตรวจสิทธิ์แบบลายเซ็น: ลิงก์ต้องมี emp_id + exp + sig (ออกโดยระบบจัดการ User) → ส่ง startSession แลก token
        แล้วใช้ token ทุกคำขอ · ล้าง query ออกจาก URL ทันที · token เก็บใน sessionStorage (ต่อแท็บ) */
-    var WHY = { nolink: "ลิงก์ไม่มี emp_id/exp/sig (เปิดตรงหรือบุ๊กมาร์กเก่า)", incomplete: "ลิงก์มีพารามิเตอร์ไม่ครบ (ต้องมี emp_id, exp, sig)",
+    var WHY = { nolink: "ลิงก์ไม่มี emp_id/exp/sig (เปิดตรงหรือบุ๊กมาร์กเก่า)", incomplete: "พารามิเตอร์ในลิงก์ไม่ถูกต้อง (ต้องมี emp_id ที่เป็นรหัสจริง · ลิงก์ลงลายเซ็นต้องมี exp และ sig ครบ)",
       expired: "ลิงก์หมดอายุ", used: "ลิงก์นี้ถูกใช้ไปแล้ว", badsig: "ลายเซ็นไม่ถูกต้อง", format: "รูปแบบลิงก์ไม่ถูกต้อง", toolong: "อายุลิงก์ยาวผิดปกติ",
-      notconfigured: "เซิร์ฟเวอร์ยังไม่ได้ตั้ง SECRET", busy: "เซิร์ฟเวอร์ไม่ว่าง ลองใหม่", server: "เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (Code.gs ที่ Deploy อาจเป็นเวอร์ชันเก่า)",
+      notconfigured: "เซิร์ฟเวอร์ยังไม่ได้ตั้ง SECRET", busy: "เซิร์ฟเวอร์ไม่ว่าง ลองใหม่", signature_required: "เซิร์ฟเวอร์ต้องการลิงก์ที่ลงลายเซ็น (ยังไม่ได้ตั้ง AUTH_MODE=emp)", notallowed: "รหัสพนักงานนี้ไม่อยู่ในรายชื่อที่อนุญาต", toomany: "เข้าสู่ระบบถี่เกินไป ลองใหม่ภายหลัง", server: "เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (Code.gs ที่ Deploy อาจเป็นเวอร์ชันเก่า)",
       network: "เชื่อมต่อ Apps Script ไม่ได้", session: "session หมดอายุ", rejected: "ถูกปฏิเสธ" };
     window.showDenied = function (why) {
       window.__DENIED = true;
-      var w = document.getElementById("gateWhy"); if (w && why) w.textContent = "รหัสสาเหตุ: " + why + " — " + (WHY[why] || "");
+      var w = document.getElementById("gateWhy"); if (w && why) w.textContent = "รหัสสาเหตุ: " + why + " — " + (WHY[why] || "") + (why === "incomplete" && window.__HAD_DETAIL ? " [" + window.__HAD_DETAIL + "]" : "");
       try { console.warn("[access denied]", why); } catch (e) {}
       var g = document.getElementById("gate"); if (g) g.style.display = "flex";
       document.body.style.overflow = "hidden";
@@ -56,7 +56,14 @@
         var sp = new URLSearchParams(location.search);
         var emp = (sp.get("emp_id") || "").trim(), exp = (sp.get("exp") || "").trim(), sig = (sp.get("sig") || "").trim();
         if (RE.test(emp) && /^\d{1,12}$/.test(exp) && sig && sig.length <= 200) boot = { emp_id: emp, exp: exp, sig: sig };
+        else if (RE.test(emp) && !exp && !sig) boot = { emp_id: emp, exp: "", sig: "" };   // ลิงก์จาก twcapp ที่มีแค่ emp_id
         window.__HAD = sp.has("emp_id") || sp.has("exp") || sp.has("sig");
+        if (window.__HAD && !boot) {   // บอกว่าขาด/ผิดตัวไหน (ไม่แสดงค่าจริง)
+          var bad = []; if (!RE.test(emp)) bad.push(emp ? "emp_id รูปแบบไม่ถูกต้อง" : "ไม่มี emp_id");
+          if (!/^\d{1,12}$/.test(exp)) bad.push(exp ? "exp ไม่ใช่ตัวเลข" : "ไม่มี exp");
+          if (!sig || sig.length > 200) bad.push(sig ? "sig ยาวเกิน" : "ไม่มี sig");
+          window.__HAD_DETAIL = bad.join(", ");
+        }
         if (sp.has("emp_id") || sp.has("exp") || sp.has("sig")) {   // ซ่อน credential จากแถบ URL (คงพารามิเตอร์อื่นไว้)
           sp.delete("emp_id"); sp.delete("exp"); sp.delete("sig");
           var q = sp.toString();
@@ -73,7 +80,7 @@
   <!-- ================= Header ================= -->
   <header class="bg-white/80 backdrop-blur-lg border-b border-white/70 sticky top-0 z-40 shadow-sm shadow-pink-100/60">
     <div id="tabAccent" class="h-1 bg-gradient-to-r from-pink-300 to-fuchsia-300 transition-all"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3" style="flex-wrap:wrap">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-pink-300 shadow-md shadow-pink-300/60">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg>
@@ -82,6 +89,14 @@
           <h1 class="text-base font-bold text-slate-900 leading-tight truncate">Product Intelligence</h1>
           <p class="text-xs text-slate-500 truncate">Wacoal vs คู่แข่ง 12 แบรนด์ · เทียบรูปทรง ราคา และโปรโมชั่น จากรูปและรายละเอียด</p>
         </div>
+      </div>
+      <div id="whyBox" style="flex:1 1 230px;max-width:380px;min-width:190px;position:relative">
+        <div style="display:flex;align-items:center;gap:6px;border:1px solid #fbcfe8;background:#fff;border-radius:999px;padding:3px 4px 3px 12px">
+          <span style="font-size:13px">🔎</span>
+          <input id="whyInput" type="text" autocomplete="off" placeholder="ถามว่าทำไมรุ่นนี้ไม่ขึ้น? เช่น WB3X96" onkeydown="if(event.key==='Enter')whyAsk()" style="flex:1;min-width:0;border:0;outline:0;font-size:12px;background:transparent">
+          <button type="button" onclick="whyAsk()" style="border:0;background:#0f172a;color:#fff;font-size:11px;font-weight:600;border-radius:999px;padding:5px 12px;cursor:pointer">ถาม</button>
+        </div>
+        <div id="whyPanel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;width:min(560px,92vw);max-height:70vh;overflow:auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 12px 32px rgba(15,23,42,.18);padding:12px;z-index:70"></div>
       </div>
       <div class="flex items-center gap-2">
         <span id="empBadge" class="inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold max-w-[11rem]" title="ผู้ใช้งาน (emp_id)">
@@ -160,14 +175,6 @@
             <p id="voiceMsg" class="text-[11px] text-slate-400 mt-1 hidden"></p>
           </div>
           <div>
-            <p class="text-xs font-semibold text-slate-600 mb-2">โหมดสี <span class="font-normal text-slate-400">(เมื่อแนบรูป)</span></p>
-            <div class="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold" role="group">
-              <button id="colSame" type="button" onclick="setColorMode('same')" class="px-3 py-1.5 rounded-lg">🎨 สีเหมือนรูป</button>
-              <button id="colAny" type="button" onclick="setColorMode('any')" class="px-3 py-1.5 rounded-lg">🌈 ทุกสี (ดูรูปทรงอย่างเดียว)</button>
-            </div>
-            <p id="colHint" class="text-[11px] text-slate-400 mt-1"></p>
-          </div>
-          <div>
             <p class="text-xs font-semibold text-slate-600 mb-2">ตัวกรองสินค้า <span class="font-normal text-slate-400">(ไม่บังคับ · คัดเฉพาะรุ่นที่ตรง รองจากรูปทรง)</span></p>
             <div id="filterBar" class="flex flex-wrap lg:flex-nowrap gap-2 items-center"></div>
             <div id="filterChips" class="flex flex-wrap gap-1.5 mt-2.5"></div>
@@ -239,7 +246,7 @@
       <!-- Toolbar -->
       <div class="bg-white rounded-2xl border border-slate-200 p-3 flex flex-col lg:flex-row lg:items-center gap-3">
         <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs font-semibold self-start" role="group">
-          <button id="modeBest" onclick="setViewMode('best')" class="px-3 py-1.5 rounded-md">แบรนด์ละ 1 รุ่น</button>
+          <button id="modeBest" onclick="setViewMode('best')" class="px-3 py-1.5 rounded-md">แบรนด์ละ 5 รุ่น</button>
           <button id="modeAll" onclick="setViewMode('all')" class="px-3 py-1.5 rounded-md">แสดงทั้งหมด</button>
         </div>
         <div id="brandFilter" class="flex gap-1.5 overflow-x-auto scroll-x flex-1"></div>
@@ -248,6 +255,7 @@
             <input type="checkbox" id="saleOnly" onchange="rerender()" class="rounded border-slate-300 text-pink-600"> เฉพาะที่ลดราคา
           </label>
           <select id="sortBy" onchange="rerender()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">
+            <option value="brand">เรียง: แบรนด์ → % ใกล้เคียง</option>
             <option value="score">เรียง: ใกล้เคียงที่สุด</option>
             <option value="priceAsc">ราคา ต่ำ → สูง</option>
             <option value="priceDesc">ราคา สูง → ต่ำ</option>
@@ -269,6 +277,7 @@
       <div id="resultGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"></div>
       <div id="similarOur"></div>
       <div id="extraGroups" class="space-y-3"></div>
+      <div id="resultTable" class="mt-4"></div>
       <div id="coverageBox"></div>
       <div id="warningBox"></div>
     </section>
@@ -322,15 +331,13 @@
 
     let selectedBase64Image = null, lastResult = null, searchSeq = 0;
     let viewMode = store.get("pis_view", "best") === "all" ? "all" : "best";
-    let colorMode = store.get("pis_color", "any") === "same" ? "same" : "any";
-    function paintColorMode() {
-      const on = "px-3 py-1.5 rounded-lg bg-white text-pink-600 shadow-sm", off = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800";
-      $("colSame").className = colorMode === "same" ? on : off; $("colAny").className = colorMode === "any" ? on : off;
-      $("colHint").textContent = colorMode === "same" ? "ให้รุ่นที่สีตรงกับรูปมาก่อน — คนละสีหลักจะถูกหักคะแนน" : "ดูรูปทรงล้วน ๆ ไม่สนสี — ทรงเดียวกันคนละสีได้คะแนนเท่ากัน";
-    }
-    function setColorMode(m) { colorMode = m; store.set("pis_color", m); paintColorMode(); }
+    const colorMode = "any";   // v6.26: ตัดตัวเลือกโหมดสีออก — ดูรูปทรงอย่างเดียวเสมอ
+    function paintColorMode() {}
+    function setColorMode() {}
     let hiddenBrands = new Set();
+    let expandedBrands = new Set(), _brandTotals = {}, tblMode = "top5", tblPick = new Set(), tblSrc = { top5: [], full: [] };   // v6.31
     let offKeys = new Set(), serverRelax = [], lastQuery = "";
+    const PER_BRAND_SHOW = 5;   // v6.23: แสดงผลแบรนด์ละ 5 รุ่น (1 แถวต่อแบรนด์)
     const WEAK_MIN = 40, WEAK_GAP = 25;   // โหมดทั้งหมด: รุ่นที่ได้ต่ำกว่า 50% หรือห่างจากรุ่นดีสุดของแบรนด์เกิน 20 คะแนน → พับไว้
 
     /* ---------------- status / warm-up ---------------- */
@@ -394,12 +401,13 @@
       const all = []; FILTER_GROUPS.forEach(g => g.opts.forEach(o => { if (filterSel.has(o[0])) all.push(o); }));
       $("filterChips").innerHTML = all.map(o => `<span class="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-full bg-pink-500 text-white text-xs">${o[1]}
         <button type="button" data-fid="${o[0]}" onclick="toggleFilter(this.dataset.fid)" aria-label="เอาออก" class="w-4 h-4 rounded-full hover:bg-white/25 leading-none">✕</button></span>`).join("") + (all.length ? `<button type="button" onclick="clearFilters()" class="text-xs text-slate-400 hover:text-red-600 px-1.5">ล้างทั้งหมด</button>` : "");
+      if (!filterSel.size) { const fn = $("filterNote"); if (fn) fn.classList.add("hidden"); }   // v6.31: ล้างตัวกรองจุดไหนก็ตาม แถบสีเขียว (ตั้งโดย AI) หายไปด้วย
     }
     function toggleDrop(id) { openFilter = openFilter === id ? null : id; renderFilters(); }
     function closeFilter() { openFilter = null; renderFilters(); }
     function toggleFilter(id) { filterSel.has(id) ? filterSel.delete(id) : filterSel.add(id); renderFilters(); }
     function clearGroup(gid) { const g = FILTER_GROUPS.find(x => x.id === gid); if (g) g.opts.forEach(o => filterSel.delete(o[0])); renderFilters(); }
-    function clearFilters() { filterSel.clear(); openFilter = null; renderFilters(); }
+    function clearFilters() { filterSel.clear(); openFilter = null; renderFilters(); const fn = $("filterNote"); if (fn) fn.classList.add("hidden"); }
     document.addEventListener("click", e => { if (openFilter && !e.composedPath().some(n => n && n.id === "filterBar")) closeFilter(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && openFilter) closeFilter(); });
 
@@ -450,7 +458,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.20";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.34";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -486,7 +494,7 @@
       const boot = window.__BOOT; window.__BOOT = null;
       if (!boot) return;                      // ไม่มีลายเซ็นใหม่ → ใช้ token เดิมใน sessionStorage (รีเฟรชหน้า)
       try {
-        const { raw } = await post({ action: "startSession", emp_id: boot.emp_id, exp: boot.exp, sig: boot.sig });
+        const { raw } = await post({ action: "startSession", emp_id: boot.emp_id, exp: boot.exp || "", sig: boot.sig || "" });
         let r = null; try { r = JSON.parse(raw); } catch (e) {}
         if (r && r.status === "success" && r.token) {
           window.TOKEN = r.token; window.EMP_ID = String(r.emp || boot.emp_id);
@@ -500,7 +508,7 @@
     })();
     /** การเชื่อมต่อหลุดระหว่างรอ (Apps Script ตอบ 404/ไม่ใช่ JSON ทั้งที่ยังทำงานอยู่) → ถามผลด้วยรหัสคำขอ (ไม่ประมวลผลซ้ำ ไม่เปลืองโควตา) */
     async function recover(rid, token, elapsedMs) {
-      const tries = elapsedMs < 30000 ? 4 : 24;   // หลุดเร็ว = น่าจะไม่ได้เริ่มทำงาน → รอสั้นๆ / หลุดช้า = น่าจะกำลังทำอยู่ → รอได้ถึง ~4 นาที
+      const tries = elapsedMs < 30000 ? 4 : Math.max(6, Math.min(24, Math.floor((420000 - elapsedMs) / 10000)));   // v6.34: Apps Script ตัดที่ ~360 วิ → ไม่รอเกิน ~7 นาทีรวม   // หลุดเร็ว = น่าจะไม่ได้เริ่มทำงาน → รอสั้นๆ / หลุดช้า = น่าจะกำลังทำอยู่ → รอได้ถึง ~4 นาที
       for (let i = 0; i < tries; i++) {
         recoverNote = " · การเชื่อมต่อหลุด รอผลจากเซิร์ฟเวอร์ " + (i + 1) + "/" + tries;
         await sleep(10000);
@@ -579,7 +587,7 @@
         }
         if (!hit) cacheSet(key, r);
         stopProgress();
-        hiddenBrands = new Set();
+        hiddenBrands = new Set(); expandedBrands = new Set(); tblPick = new Set();
         lastResult = r; serverRelax = relax; lastQuery = query; cmpSel = [];
         offKeys = new Set(((r.reference || {}).constraints || []).filter(k => k.off).map(k => k.key));
         $("cacheBadge").classList.toggle("hidden", !hit);
@@ -636,32 +644,118 @@
       const isBad = x => failsOf(x, act).some(k => !modelKeys.has(k) && (!hasImgRef || coreKeys.has(k)));
       const bad = pool.filter(isBad);
       const ok = pool.filter(x => !isBad(x));
-      const best = {};
-      ok.forEach(x => { if (!best[x.brand] || x.matchScore > best[x.brand].matchScore) best[x.brand] = x; });
-      let main, weak = [];
-      if (viewMode === "all") {
-        main = ok.filter(x => best[x.brand] === x || x.matchScore >= Math.max(WEAK_MIN, best[x.brand].matchScore - WEAK_GAP));
-        weak = ok.filter(x => main.indexOf(x) < 0);
-      } else {
-        main = Object.keys(best).map(b => best[b]).filter(x => x.matchScore >= 30);
-      }
-      // รุ่น Wacoal อื่นที่คล้ายกัน (นอกจากรุ่นหลักที่แสดงในตาราง) — แสดงแยกเสมอ แม้ไม่ได้เปิดโหมดทั้งหมด
-      const ourBest = best[OUR_BRAND];
-      const ourSim = ok.filter(x => isOur(x) && x !== ourBest && main.indexOf(x) < 0 && x.matchScore >= WEAK_MIN).sort((a, b) => b.matchScore - a.matchScore).slice(0, 6);
-      return { main: sortItems(main), weak: sortItems(weak), bad: sortItems(bad), ourSim };
+      // v6.23: แบรนด์ละ 5 รุ่น (เรียงตาม % ความใกล้เคียง) — โหมด "แสดงทั้งหมด" เก็บรุ่นที่เหลือ (≥ 30%) ไว้ในกลุ่มพับ
+      const byB = {};
+      ok.forEach(x => (byB[x.brand] = byB[x.brand] || []).push(x));
+      const byScore = (a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0);
+      let main = [], weak = [], top5 = [], full = [];
+      _brandTotals = {};
+      Object.keys(byB).forEach(b => {
+        const arr = byB[b].filter(x => x.matchScore >= 30).sort(byScore);
+        _brandTotals[b] = arr.length;
+        main = main.concat(viewMode === "all" && expandedBrands.has(b) ? arr : arr.slice(0, PER_BRAND_SHOW));   // v6.33: "แบรนด์ละ 5 รุ่น" = 5 รุ่นเสมอ ไม่มีปุ่ม · "แสดงทั้งหมด" = มีปุ่ม "แสดงเพิ่มเติม" ให้กดขยายทีละแบรนด์
+        top5 = top5.concat(arr.slice(0, PER_BRAND_SHOW)); full = full.concat(arr);                            // ใช้กับตารางเปรียบเทียบ (เลือกโหมดแยกต่างหาก)
+      });
+      return { main: sortItems(main), weak: sortItems(weak), bad: sortItems(bad), ourSim: [], top5: sortItems(top5), full: sortItems(full) };
     }
+
+    /* ===== v6.26: ถาม "ทำไมรุ่นนี้ไม่ขึ้น/ได้ % น้อย" — ตอบจากผลที่ระบบบันทึกไว้ (ไม่เรียก Gemini) ===== */
+    function whyAsk() {
+      const q = $("whyInput").value.trim(), box = $("whyPanel");
+      if (!q) { box.style.display = "none"; return; }
+      const card = (tone, title, body) => { const c = { ok: ["#ecfdf5", "#047857"], warn: ["#fffbeb", "#b45309"], stop: ["#fef2f2", "#b91c1c"], info: ["#f8fafc", "#475569"] }[tone];
+        return `<div style="border-radius:10px;background:${c[0]};padding:9px 11px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:${c[1]}">${title}</div><div style="font-size:12px;color:#334155;margin-top:3px;line-height:1.55">${body}</div></div>`; };
+      const wrap = inner => { box.style.display = "block"; box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:12px;color:#0f172a">ทำไมรุ่น “${esc(q)}” ?</b><button type="button" onclick="$('whyPanel').style.display='none'" style="border:0;background:transparent;font-size:16px;cursor:pointer;color:#64748b">×</button></div>${inner}<div style="font-size:10.5px;color:#94a3b8">ตอบจากผลการค้นล่าสุดที่บันทึกไว้ ไม่ได้เรียก AI เพิ่ม</div>`; };
+      if (!lastResult) return wrap(card("info", "ยังไม่มีผลค้นหา", "ค้นหาสินค้าก่อน แล้วค่อยถามว่ารุ่นไหนหายไปไหน"));
+      const d = lastResult.diag;
+      if (!d || !d.items) return wrap(card("warn", "ยังไม่มีข้อมูลสำหรับตอบ", "Code.gs ที่ Deploy อยู่ยังเป็นเวอร์ชันเก่า (ต้อง v6.18 ขึ้นไป) แล้วค้นหาใหม่อีกครั้ง"));
+      const norm = t => String(t || "").toUpperCase().replace(/[^A-Z0-9ก-๙]/g, ""), nq = norm(q);
+      // v6.28: พิมพ์เป็นประโยคได้ — ดึงรหัสรุ่นทุกตัวในประโยคมาตอบทีละรุ่น (เช่น "ทำไม WB3X96 ถึง % น้อยกว่า WB5X63")
+      const toks = Array.from(new Set((q.match(/[A-Za-z]{1,3}\d[A-Za-z0-9]{1,}/g) || []).map(t => t.toUpperCase())));
+      if (toks.length > 1 || (toks.length === 1 && norm(toks[0]) !== nq)) return whyMulti(toks, q, wrap, card, d);
+      if (nq.length < 3) return wrap(card("info", "พิมพ์รหัสรุ่นให้ยาวขึ้น", "อย่างน้อย 3 ตัวอักษร เช่น WB3X96"));
+      const hits = d.items.filter(x => norm(x.k).indexOf(nq) >= 0 || norm(x.t).indexOf(nq) >= 0).slice(0, 6);
+      if (!hits.length) {
+        const wl = /^W[A-Z0-9]/i.test(q.trim());
+        const tot = Object.keys(d.brands || {}).map(b => b + " " + d.brands[b].styles).join(" · ");
+        return wrap(card("stop", "ไม่พบรุ่นนี้ในข้อมูลที่ระบบดึงมา",
+          "ระบบไม่เห็นรุ่นนี้เลยในการค้นครั้งนี้ จึงไม่มีทางเทียบได้ " + (wl ? "(ถ้าเป็นรุ่น Wacoal อาจยังไม่ขึ้นขายบน wacoal.co.th ซึ่งเป็นแหล่งข้อมูลของระบบ)" : "(เว็บของแบรนด์อาจไม่มีรุ่นนี้ หรือระบบดึงมาไม่ถึง)") +
+          `<br><span style="color:#94a3b8">จำนวนสไตล์ที่ดึงมาได้: ${esc(tot || "-")}</span>`));
+      }
+      const g = groupedItems(), allp = ((lastResult.all || []).length ? lastResult.all : (lastResult.data || []));
+      const sk = x => String(x.code || x.title).replace(/-[0-9a-z]{4}$/i, "");
+      const act = [...activeKeys()];
+      const out = hits.map(h => {
+        const name = `<b>${esc(h.b)}</b> · ${esc(h.k)} <span style="color:#94a3b8">${esc(h.t)}</span>`;
+        const sc = Object.keys(h).length && h.s != null ? h.s : null;
+        if (h.g === "ok") {
+          const mine = allp.filter(x => x.brand === h.b && sk(x) === h.k).sort((a, b) => b.matchScore - a.matchScore)[0];
+          if (!mine) return card("info", name, "ได้คะแนนถึงเกณฑ์ แต่ไม่พบในรายการที่แสดง");
+          const rank = allp.filter(x => x.brand === h.b).sort((a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0)).findIndex(x => x.id === mine.id) + 1;
+          const score = `ได้ ${mine.matchScore}%` + (mine.imageScore != null ? ` (รูปทรง ${mine.imageScore}%×70% + รายละเอียด ${mine.textScore ?? "-"}%×30%${mine.rawScore != null && mine.rawScore !== mine.matchScore ? " − ค่าปรับเงื่อนไข " + (mine.rawScore - mine.matchScore) : ""})` : "");
+          const inMain = g.main.some(x => x.id === mine.id), inWeak = g.weak.some(x => x.id === mine.id), inBad = g.bad.some(x => x.id === mine.id);
+          if (inMain) return card("ok", name + " — ขึ้นในผลแล้ว", `${score} · อันดับ ${rank} ของแบรนด์ ${esc(h.b)}` + (mine.different ? `<br>ต่างจากสินค้าอ้างอิง: ${esc(mine.different)}` : ""));
+          if (hiddenBrands.has(h.b)) return card("warn", name + " — ถูกซ่อน", `${score} · แต่คุณปิดแบรนด์ ${esc(h.b)} ไว้ (ชิปแบรนด์ด้านบนผลลัพธ์)`);
+          if ($("saleOnly").checked && !(discountOf(mine) > 0)) return card("warn", name + " — ถูกซ่อน", `${score} · แต่ติ๊ก “เฉพาะลดราคา” ไว้ และรุ่นนี้ไม่มีส่วนลด`);
+          if (inBad) return card("warn", name + " — ขัดเงื่อนไขที่เลือก", `${score} · ขัดเงื่อนไข: ${esc((mine.violations || []).filter(k => act.indexOf(k) >= 0).join(", ") || "-")} จึงอยู่ในกลุ่มพับ (ลองปิดชิปเงื่อนไขนั้น)`);
+          if (inWeak) return card("warn", name + " — อยู่ส่วน “รุ่นอื่นของแต่ละแบรนด์”", `${score} · เป็นอันดับ ${rank} ของแบรนด์ เกินโควตาแสดง ${PER_BRAND_SHOW} รุ่น/แบรนด์ จึงถูกพับไว้ (เลื่อนลงไปดูส่วนล่างผลลัพธ์)`);
+          return card("warn", name + " — เกินโควตา " + PER_BRAND_SHOW + " รุ่น/แบรนด์", `${score} · เป็นอันดับ ${rank} ของแบรนด์ — กดปุ่ม “แสดงทั้งหมด” เพื่อดู`);
+        }
+        if (h.g === "low") return card("stop", name + " — คะแนนต่ำกว่าเกณฑ์", `AI ให้ ${h.s}%` + (h.i != null ? ` (รูปทรง ${h.i}%×70% + รายละเอียด ${h.x ?? "-"}%×30%)` : "") + ` ต่ำกว่าเกณฑ์ขั้นต่ำ 30% จึงไม่แสดง — รูปทรงต่างจากสินค้าอ้างอิงมาก`);
+        if (h.g === "unscored") return card("warn", name + " — AI ไม่ส่งคะแนนกลับ", "รุ่นนี้ถูกส่งให้ AI เทียบแล้วแต่ AI ตอบไม่ครบ (มักเกิดเมื่อรูปเยอะ) — ลองค้นซ้ำอีกครั้ง");
+        if (h.g === "cap") return card("warn", name + " — เกินจำนวนรูปที่เทียบต่อครั้ง", `ผ่านการคัดแล้ว แต่ชุดเทียบจำกัด ${d.maxPool || 130} รุ่นต่อการค้น จึงถูกตัดท้ายสุด — ลองใส่ตัวกรองเพื่อลดจำนวนรุ่น`);
+        if (h.g === "short") return card("stop", name + " — ไม่ถูกคัดเข้าชุดเทียบ", `ผ่านประเภทสินค้าแล้ว แต่แต่ละแบรนด์ส่งให้ AI เทียบได้ ${h.b === "Wacoal" && d.hasImage ? d.wacoalCap : d.shortlistPerBrand} สไตล์ รุ่นนี้อยู่ลำดับหลังเพดาน (จัดลำดับจากความใกล้เคียงของชื่อ/คำอธิบาย${h.b === "Wacoal" && d.hasImage ? " และรหัสรุ่นนำหน้า" : ""}) — ลองพิมพ์ชื่อ/ลักษณะของรุ่นนี้เพิ่มในช่องค้นหา`);
+        return card("stop", name + " — ไม่ผ่านประเภทสินค้า/ตัวกรอง", `ไม่ผ่านการกรองประเภทสินค้าหรือตัวกรองที่เลือก${act.length ? " (" + esc(act.join(", ")) + ")" : ""} จึงไม่ถูกนำไปเทียบ — ลองลบตัวกรอง/เงื่อนไขในข้อความค้นหา`);
+      });
+      wrap(out.join(""));
+    }
+    function whyMulti(toks, q, wrap, card, d) {
+      const norm = t => String(t || "").toUpperCase().replace(/[^A-Z0-9ก-๙]/g, "");
+      const sk = x => String(x.code || x.title).replace(/-[0-9a-z]{4}$/i, "");
+      const allp = ((lastResult.all || []).length ? lastResult.all : (lastResult.data || []));
+      const rows = toks.map(t => {
+        const nt = norm(t), h = d.items.filter(x => norm(x.k).indexOf(nt) >= 0 || norm(x.t).indexOf(nt) >= 0)[0];
+        const mine = h && h.g === "ok" ? allp.filter(x => x.brand === h.b && sk(x) === h.k).sort((a, b) => b.matchScore - a.matchScore)[0] : null;
+        return { t, h, mine };
+      });
+      const pen = m => m.rawScore != null ? m.rawScore - m.matchScore : 0;
+      const line = r => {
+        if (!r.h) return card("stop", esc(r.t) + " — ไม่พบในข้อมูลที่ระบบดึงมา", "ระบบไม่เห็นรุ่นนี้ในการค้นครั้งนี้ จึงเทียบไม่ได้ (ถ้าเป็นรุ่น Wacoal อาจยังไม่ขึ้นขายบน wacoal.co.th)");
+        if (r.mine) { const m = r.mine; return card("ok", `<b>${esc(r.h.b)}</b> · ${esc(r.h.k)} — ได้ ${m.matchScore}%`, m.imageScore != null ? `รูปทรง ${m.imageScore}%×70% + รายละเอียด ${m.textScore ?? "-"}%×30%` + (pen(m) ? ` − ค่าปรับเงื่อนไข ${pen(m)}` : "") + (m.similar ? `<br>เหมือน: ${esc(m.similar)}` : "") + (m.different ? `<br>ต่าง: ${esc(m.different)}` : "") : "ประเมินจากรายละเอียดอย่างเดียว"); }
+        const why = { low: `AI ให้ ${r.h.s}% ต่ำกว่าเกณฑ์ 30% จึงไม่แสดง`, short: "ไม่ถูกคัดเข้าชุดเทียบ (เกินเพดานต่อแบรนด์)", cap: "เกินจำนวนรูปที่เทียบต่อครั้ง", unscored: "AI ไม่ส่งคะแนนกลับ", cat: "ไม่ผ่านประเภทสินค้า/ตัวกรอง" }[r.h.g] || "";
+        return card("stop", `<b>${esc(r.h.b)}</b> · ${esc(r.h.k)} — ไม่แสดง`, why);
+      };
+      let cmp = "";
+      const ms = rows.filter(r => r.mine);
+      if (ms.length >= 2) {
+        const a = ms[0].mine, b = ms[1].mine, hi = a.matchScore >= b.matchScore ? [ms[0], ms[1]] : [ms[1], ms[0]];
+        const H = hi[0].mine, L = hi[1].mine, diff = H.matchScore - L.matchScore;
+        if (diff === 0) cmp = card("info", "สรุปการเทียบ", `${esc(hi[0].h.k)} และ ${esc(hi[1].h.k)} ได้คะแนนเท่ากัน (${H.matchScore}%)`);
+        else {
+          const di = (H.imageScore != null && L.imageScore != null) ? (H.imageScore - L.imageScore) : null, dt = (H.textScore != null && L.textScore != null) ? (H.textScore - L.textScore) : null;
+          const parts = [];
+          if (di) parts.push(`รูปทรง ${di >= 0 ? "ต่ำกว่า" : "สูงกว่า"} ${Math.abs(di)} จุด (น้ำหนัก 70% → ${di >= 0 ? "−" : "+"}${Math.abs(Math.round(di * .7))})`);
+          if (dt) parts.push(`รายละเอียด ${dt >= 0 ? "ต่ำกว่า" : "สูงกว่า"} ${Math.abs(dt)} จุด (น้ำหนัก 30% → ${dt >= 0 ? "−" : "+"}${Math.abs(Math.round(dt * .3))})`);
+          const pd = pen(L) - pen(H); if (pd) parts.push(`ค่าปรับเงื่อนไข ${pd > 0 ? "มากกว่า" : "น้อยกว่า"} ${Math.abs(pd)}`);
+          cmp = card("warn", `สรุป: ${esc(hi[1].h.k)} (${L.matchScore}%) น้อยกว่า ${esc(hi[0].h.k)} (${H.matchScore}%) อยู่ ${diff} จุด`, "เพราะ " + (parts.join(" · ") || "คะแนนรวมต่างกัน") + (L.different ? `<br>จุดที่ต่างจากสินค้าอ้างอิง: ${esc(L.different)}` : ""));
+        }
+      }
+      wrap(cmp + rows.map(line).join(""));
+    }
+    document.addEventListener("click", e => { const b = $("whyBox"), p = $("whyPanel"); if (p && p.style.display !== "none" && b && !b.contains(e.target)) p.style.display = "none"; });
     const OUR_BRAND = "Wacoal";
     const isOur = x => x && x.brand === OUR_BRAND;
     const ourFirst = arr => arr.filter(isOur).concat(arr.filter(x => !isOur(x)));   // Wacoal อยู่แรกเสมอ (ไม่ว่าคะแนน/การเรียงแบบไหน)
     function sortItems(items) {
       const s = $("sortBy").value;
       const sorters = {
+        brand: (a, b) => (isOur(b) - isOur(a)) || String(a.brand).localeCompare(String(b.brand), "en") || b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),   // Wacoal ก่อน → แบรนด์ A–Z → % มากไปน้อย
         score: (a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),
         priceAsc: (a, b) => (a.price ?? 1e9) - (b.price ?? 1e9),
         priceDesc: (a, b) => (b.price ?? -1) - (a.price ?? -1),
         discount: (a, b) => discountOf(b) - discountOf(a)
       };
-      return ourFirst(items.slice().sort(sorters[s] || sorters.score));
+      return ourFirst(items.slice().sort(sorters[s] || sorters.brand));
     }
     function currentItems() { return groupedItems().main; }
 
@@ -674,11 +768,12 @@
       renderConstraints();
       updateTray(); if (curTab !== "search") renderTab();
       const grid = $("resultGrid");
+      $("resultTable").innerHTML = "";
       if (!items.length) grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm">ไม่มีสินค้าที่ตรงเงื่อนไขและตัวกรองที่เลือก${g.bad.length ? " · ลองปิดเงื่อนไขบางข้อด้านบน" : ""}</div>`;
       else {
-        const shown = sortItems(items.concat(g.ourSim || []));   // รุ่น Wacoal ที่คล้ายกันอยู่รวมกับ Wacoal หลัก (Wacoal มาก่อนเสมอ)
-        if (viewMode === "all" && $("sortBy").value === "score") grid.innerHTML = renderGrouped(shown);
-        else grid.innerHTML = shown.map(cardHtml).join("");
+        const shown = sortItems(items);   // Wacoal มาก่อนเสมอ
+        grid.innerHTML = $("sortBy").value === "brand" ? renderBrandRows(shown) : shown.map(cardHtml).join("");
+        renderResultTable(g);
       }
       const sim = [];
       $("similarOur").innerHTML = sim.length ? `<div class="rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/70 to-white p-4 fade-in">
@@ -690,7 +785,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 pt-1 opacity-90">${list.map(cardHtml).join("")}</div>
         </details>` : "";
       $("extraGroups").innerHTML =
-        fold("ใกล้เคียงน้อย", `ต่ำกว่า ${WEAK_MIN}% หรือห่างจากรุ่นที่ดีที่สุดของแบรนด์เกิน ${WEAK_GAP} คะแนน`, g.weak, "border-slate-200") +
+        fold("รุ่นอื่นของแต่ละแบรนด์", `เกิน ${PER_BRAND_SHOW} รุ่นแรก · ใกล้เคียงตั้งแต่ 30% ขึ้นไป`, g.weak, "border-slate-200") +
         fold("❌ ไม่ตรงเงื่อนไข", "AI หรือชื่อ/คำอธิบายสินค้าบอกว่าขัดกับเงื่อนไขที่เลือก", g.bad, "border-red-200");
       renderCoverage(lastResult.coverage || []);
       renderWarnings(lastResult.warnings || []);
@@ -771,14 +866,11 @@
       const median = prices.length ? prices[Math.floor((prices.length - 1) / 2)] : null;
       const our = +$("ourPrice").value || 0;
       const tiles = [
-        ["แบรนด์คู่แข่ง / รุ่นที่พบ", `${brands.size} <span class="text-sm font-medium text-slate-400">/ ${items.length} รุ่น</span>`, ""],
+        ["แบรนด์ / รุ่นที่พบ (รวม Wacoal)", `${new Set(all.map(x => x.brand)).size} <span class="text-sm font-medium text-slate-400">/ ${all.length} รุ่น</span>`,
+          `Wacoal ${all.length - items.length} รุ่น · คู่แข่ง ${brands.size} แบรนด์ ${items.length} รุ่น`],
         ["ช่วงราคา", prices.length ? `${baht(prices[0])} – ${baht(prices[prices.length - 1])}` : "-", median ? `ราคากลาง ${baht(median)}` : ""],
         ["กำลังลดราคา", `${onSale.length} <span class="text-sm font-medium text-slate-400">รุ่น</span>`,
-          onSale.length ? `ลดสูงสุด ${Math.max(...onSale.map(discountOf))}% · ${esc(onSale.sort((a, b) => discountOf(b) - discountOf(a))[0].brand)}` : "ไม่มีรุ่นที่ลดราคา"],
-        our && median
-          ? ["ราคา Wacoal vs ตลาด", `${our > median ? "+" : ""}${Math.round((our - median) / median * 100)}%`,
-             `${baht(our)} เทียบราคากลาง · ถูกกว่า ${prices.filter(p => p > our).length}/${prices.length} รุ่น`]
-          : ["ราคา Wacoal vs ตลาด", `<span class="text-sm font-medium text-slate-400">ใส่ราคาสินค้า</span>`, "ช่องที่ 3 ด้านบน"]
+          onSale.length ? `ลดสูงสุด ${Math.max(...onSale.map(discountOf))}% · ${esc(onSale.sort((a, b) => discountOf(b) - discountOf(a))[0].brand)}` : "ไม่มีรุ่นที่ลดราคา"]
       ];
       $("summaryTiles").innerHTML = tiles.map(([k, v, sub]) => `
         <div class="bg-white rounded-2xl border border-slate-200 p-4">
@@ -804,7 +896,7 @@
       $("modeBest").className = viewMode === "best" ? on : off;
       $("modeAll").className = viewMode === "all" ? on : off;
     }
-    function setViewMode(m) { viewMode = m; store.set("pis_view", m); paintToggle(); rerender(); }
+    function setViewMode(m) { viewMode = m; expandedBrands = new Set(); store.set("pis_view", m); paintToggle(); rerender(); }
 
     function insightBadges(x) {
       const b = [];
@@ -815,11 +907,6 @@
         if (pi.isLowest) b.push(`<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold">ต่ำสุดใน 30 วัน</span>`);
         else b.push(`<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px]">ต่ำสุด 30 วัน ${baht(pi.min30)}</span>`);
         if (pi.changeFromPrev) b.push(`<span class="px-2 py-0.5 rounded-md ${pi.changeFromPrev < 0 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"} text-[11px]">${pi.changeFromPrev > 0 ? "▲" : "▼"} ${Math.abs(pi.changeFromPrev)}% จากครั้งก่อน</span>`);
-      }
-      const our = +$("ourPrice").value || 0;
-      if (our && x.price) {
-        const diff = Math.round((x.price - our) / our * 100);
-        b.push(`<span class="px-2 py-0.5 rounded-md ${diff < 0 ? "bg-amber-50 text-amber-800" : "bg-sky-50 text-sky-700"} text-[11px]">${diff < 0 ? "ถูกกว่าเรา " + Math.abs(diff) : diff > 0 ? "แพงกว่าเรา " + diff : "เท่าราคาเรา "}${diff ? "%" : ""}</span>`);
       }
       return b.join("");
     }
@@ -864,6 +951,135 @@
         </article>`;
     }
 
+    /** 1 แถวต่อแบรนด์ แสดงได้ 5 รุ่น (Wacoal ก่อน → แบรนด์ A–Z; ในแถวเรียง % มากไปน้อย) */
+    function renderBrandRows(items) {
+      const groups = {}, order = [];
+      items.forEach(x => { if (!groups[x.brand]) { groups[x.brand] = []; order.push(x.brand); } groups[x.brand].push(x); });
+      return order.map(b => {
+        const n = groups[b].length, total = _brandTotals[b] || n, more = viewMode === "all" && total > PER_BRAND_SHOW, expanded = more && n >= total;
+        const tone = brandTone(b);
+        const btnCss = `border:2px dashed ${tone.solid};background:${tone.tint};color:${tone.solid};border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.5;padding:10px 6px;text-align:center`;
+        const btn = !more ? "" : expanded
+          ? `<button type="button" data-b="${esc(b)}" onclick="toggleBrand(this.dataset.b)" style="${btnCss};min-height:72px">▲ ย่อกลับ<br>เหลือ ${PER_BRAND_SHOW} รุ่น</button>`
+          : `<button type="button" data-b="${esc(b)}" onclick="toggleBrand(this.dataset.b)" style="${btnCss}">+ แสดงเพิ่มเติม<br>อีก ${total - n} รุ่น ›</button>`;
+        const cols = more && !expanded ? `repeat(${PER_BRAND_SHOW},minmax(185px,1fr)) 112px` : `repeat(${PER_BRAND_SHOW},minmax(185px,1fr))`;
+        return `
+        <section class="col-span-full">
+          <div class="flex items-center gap-2 pt-2 pb-2">
+            <h3 class="text-sm font-bold ${b === OUR_BRAND ? "text-pink-600" : "text-slate-900"}">${b === OUR_BRAND ? "★ " : ""}${esc(b)}</h3>
+            <span class="text-xs text-slate-400">${more && !expanded ? n + " จาก " + total : n} รุ่น · เรียงตาม % ความใกล้เคียง</span>
+            <div class="flex-1 border-t border-slate-200"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:${cols};gap:12px;overflow-x:auto;padding-bottom:6px">${groups[b].map(cardHtml).join("")}${btn}</div>
+        </section>`;
+      }).join("");
+    }
+    function toggleBrand(b) { expandedBrands.has(b) ? expandedBrands.delete(b) : expandedBrands.add(b); rerender(); }
+    /** ตารางเปรียบเทียบ: ลำดับ · รูป+แบรนด์/รุ่น · % ความใกล้เคียง · ราคาปกติ · ราคาโปรโมชั่น · ลิงก์ — กดหัวคอลัมน์เพื่อเรียง (▲▼) */
+    let tblRows = [], tblSort = { key: "rank", dir: 1 };
+    const onPromo = x => x.compareAt && x.price && x.compareAt > x.price;
+    const TBL_COLS = {   // ค่าที่ใช้เรียงของแต่ละคอลัมน์ (null = ไปท้ายเสมอ)
+      rank: r => r.rank,
+      brand: r => String(r.x.brand || "") + "|" + String(r.x.code || r.x.title || ""),
+      pct: r => r.x.matchScore,
+      reg: r => (r.x.price != null || r.x.compareAt) ? (onPromo(r.x) ? r.x.compareAt : r.x.price) : null,
+      promo: r => onPromo(r.x) ? r.x.price : null,
+      link: r => r.x.url || null
+    };
+    function sortTable(key) {
+      tblSort = tblSort.key === key ? { key: key, dir: -tblSort.dir } : { key: key, dir: key === "pct" ? -1 : 1 };   // % เริ่มจากมากไปน้อย
+      paintResultTable();
+    }
+    function renderResultTable(g) { tblSrc = g; tblPaintAll(); }
+    function tblItems() { return tblMode === "all" ? tblSrc.full : tblMode === "pick" ? tblSrc.full.filter(x => tblPick.has(x.id)) : tblSrc.top5; }
+    function tblPaintAll() { tblRows = tblItems().map((x, i) => ({ x: x, rank: i + 1 })); paintResultTable(); }   // ลำดับ = ลำดับเดิม ติดกับรุ่น ไม่เปลี่ยนตามการเรียง
+    function setTblMode(m) { tblMode = m; if (m === "pick" && !tblPick.size) tblSrc.top5.forEach(x => tblPick.add(x.id)); tblPaintAll(); }
+    function tblToggle(id) { tblPick.has(id) ? tblPick.delete(id) : tblPick.add(id); tblPaintAll(); }
+    function tblPickSet(kind) { tblPick = new Set((kind === "all" ? tblSrc.full : kind === "top5" ? tblSrc.top5 : []).map(x => x.id)); tblPaintAll(); }
+    // v6.30: คลิกรูปในตารางเพื่อดูรูปใหญ่ (Esc / คลิกที่ใดก็ได้เพื่อปิด)
+    const bigImgUrl = u => (u && /image\.uniqlo\.com|cdn\.shopify\.com|\/cdn\/shop\//i.test(u)) ? (/[?&]width=\d+/.test(u) ? u.replace(/([?&]width=)\d+/, "$11200") : u + (u.includes("?") ? "&" : "?") + "width=1200") : u;
+    function openImg(src, cap) {
+      if (!src) return;
+      let o = $("imgLightbox");
+      if (!o) { o = document.createElement("div"); o.id = "imgLightbox"; o.onclick = closeImg;
+        o.style.cssText = "position:fixed;inset:0;background:rgba(15,23,42,.82);z-index:100;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:20px;cursor:zoom-out";
+        document.body.appendChild(o); }
+      o.innerHTML = `<img src="${esc(src)}" referrerpolicy="no-referrer" alt="" style="max-width:min(92vw,900px);max-height:82vh;object-fit:contain;background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)"><div style="color:#fff;font-size:13px;text-align:center;max-width:90vw">${esc(cap || "")}</div><div style="color:#cbd5e1;font-size:11px">คลิกที่ใดก็ได้หรือกด Esc เพื่อปิด</div>`;
+      o.style.display = "flex";
+    }
+    function closeImg() { const o = $("imgLightbox"); if (o) o.style.display = "none"; }
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeImg(); });
+    // v6.29: สีประจำแบรนด์ในตาราง (แถบซ้าย + พื้นจาง + ชิปชื่อแบรนด์)
+    const BRAND_RGB = { "Wacoal": [219, 39, 119], "Triumph": [220, 38, 38], "Sabina": [124, 58, 237], "B'me": [13, 148, 136], "Wienna": [37, 99, 235], "BSC": [234, 88, 12], "Uniqlo": [202, 138, 4] };
+    function brandTone(b) {
+      let c = BRAND_RGB[b];
+      if (!c) { let h = 0; String(b).split("").forEach(ch => h = (h * 31 + ch.charCodeAt(0)) % 360); const f = (n, k = (n + h / 30) % 12) => Math.round(255 * (0.4 - 0.3 * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); c = [f(0), f(8), f(4)]; }
+      return { solid: `rgb(${c.join(",")})`, tint: `rgba(${c.join(",")},.07)` };
+    }
+    // v6.32: ลำดับแถวตามที่เห็นในตาราง (ใช้ร่วมกับรายงาน PDF / CSV)
+    function tblOrdered() {
+      const get = TBL_COLS[tblSort.key] || TBL_COLS.rank, dir = tblSort.dir;
+      return tblRows.slice().sort((p, q) => {
+        const a = get(p), b = get(q);
+        if (a == null && b == null) return p.rank - q.rank;
+        if (a == null) return 1;                       // ไม่มีข้อมูล → ท้ายตารางทั้งขึ้นและลง
+        if (b == null) return -1;
+        const c = typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b), "th");
+        return c ? c * dir : p.rank - q.rank;
+      });
+    }
+    function paintResultTable() {
+      const box = $("resultTable");
+      if (!tblSrc.full.length) { box.innerHTML = ""; return; }
+      const list = tblOrdered();
+      const dir = tblSort.dir;
+      const th = (key, label, cls) => `<th class="p-2 cursor-pointer select-none hover:bg-slate-100 ${cls || ""}" onclick="sortTable('${key}')" title="กดเพื่อเรียงตามคอลัมน์นี้">${label} <span class="${tblSort.key === key ? "text-pink-600" : "text-slate-300"}">${tblSort.key === key ? (dir > 0 ? "▲" : "▼") : "⇅"}</span></th>`;
+      const refR = (lastResult && lastResult.reference) || {}, aiR = lastResult && lastResult.autoImage, spR = refR.modelSpec;
+      const refSrc = selectedBase64Image || (aiR && aiR.imageUrl) || "";
+      const refTitle = lastQuery || refR.query || (spR && spR.code) || "สินค้าอ้างอิง";
+      const refDetail = [spR && [spR.name, spR.summary].filter(Boolean).join(" — "), refR.summary, (refR.features || []).length ? "ลักษณะ: " + refR.features.slice(0, 8).join(", ") : "", refR.color ? "สี: " + refR.color : ""].filter(Boolean);
+      const refRow = `
+        <tr style="background:#fff7ed;border-top:1px solid #fed7aa;border-bottom:2px solid #fdba74">
+          <td class="p-2 text-center" style="border-left:5px solid #f97316;font-size:18px" title="ไม่ถูกจัดเรียง — อยู่บนสุดเสมอ">🔎</td>
+          <td class="p-2"><div style="display:flex;align-items:center;gap:10px">
+            ${refSrc ? `<img src="${esc(refSrc)}" data-big="${esc(bigImgUrl(refSrc))}" data-cap="สินค้าที่ค้นหา: ${esc(refTitle)}" onclick="openImg(this.dataset.big, this.dataset.cap)" title="คลิกเพื่อดูรูปใหญ่" alt="" referrerpolicy="no-referrer" style="width:56px;height:56px;object-fit:contain;background:#fff;border-radius:8px;flex:none;cursor:zoom-in;border:1px solid #fed7aa">`
+              : `<div style="width:56px;height:56px;border-radius:8px;flex:none;background:#fff;border:1px dashed #fdba74;display:flex;align-items:center;justify-content:center;font-size:10px;color:#9a3412;text-align:center">ไม่มีรูป</div>`}
+            <div><div style="margin-bottom:2px"><span style="display:inline-block;background:#f97316;color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">สินค้าที่ค้นหา</span></div>
+            <div class="text-sm font-semibold text-slate-900">${esc(refTitle)}</div></div></div></td>
+          <td class="p-2 text-xs text-slate-600" colspan="4">${refDetail.length ? refDetail.map(t => esc(t)).join("<br>") : "ค้นจากรูป/ข้อความที่ใส่"}</td>
+        </tr>`;
+      const segOn = "background:#fff;color:#db2777;box-shadow:0 1px 2px rgba(15,23,42,.15)", segOff = "background:transparent;color:#64748b";
+      const seg = (m, label) => `<button type="button" onclick="setTblMode('${m}')" style="border:0;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;${tblMode === m ? segOn : segOff}">${label}</button>`;
+      let picker = "";
+      if (tblMode === "pick") {
+        const byb = {}, ord = []; tblSrc.full.forEach(x => { if (!byb[x.brand]) { byb[x.brand] = []; ord.push(x.brand); } byb[x.brand].push(x); });
+        const act = (k, label) => `<button type="button" onclick="tblPickSet('${k}')" style="border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:600;color:#475569;cursor:pointer">${label}</button>`;
+        picker = `<div style="margin:0 16px 12px;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;background:#f8fafc">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px"><b style="font-size:12px;color:#334155">เลือกรุ่นที่จะเทียบ · เลือกแล้ว ${tblPick.size} จาก ${tblSrc.full.length} รุ่น</b>${act("all", "เลือกทั้งหมด")}${act("top5", "5 รุ่นแรกของแต่ละแบรนด์")}${act("none", "ล้างที่เลือก")}</div>
+          ${ord.map(b => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px"><span style="display:inline-block;min-width:74px;background:${brandTone(b).solid};color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700;text-transform:uppercase;text-align:center">${esc(b)}</span>${byb[b].map(x => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${tblPick.has(x.id) ? brandTone(b).solid : "#e2e8f0"};background:${tblPick.has(x.id) ? brandTone(b).tint : "#fff"};border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer"><input type="checkbox" data-id="${esc(x.id)}" ${tblPick.has(x.id) ? "checked" : ""} onchange="tblToggle(this.dataset.id)">${esc(x.code || x.title)} <b style="color:${scoreColor(x.matchScore)}">${x.matchScore}%</b></label>`).join("")}</div>`).join("")}</div>`;
+      }
+      const emptyRow = list.length ? "" : `<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">ยังไม่ได้เลือกรุ่น — ติ๊กรุ่นที่ต้องการเทียบในกรอบด้านบน</td></tr>`;
+      const rows = refRow + emptyRow + list.map(({ x, rank }) => `
+        <tr class="border-t border-slate-100" style="background:${brandTone(x.brand).tint}">
+          <td class="p-2 text-center text-slate-500" style="border-left:5px solid ${brandTone(x.brand).solid}">${rank}</td>
+          <td class="p-2"><div style="display:flex;align-items:center;gap:10px">
+            <img src="${esc(displayImg(x.imageUrl))}" data-big="${esc(bigImgUrl(x.imageUrl))}" data-cap="${esc(x.brand + " · " + (x.code || "") + " " + x.title)}" onclick="openImg(this.dataset.big, this.dataset.cap)" title="คลิกเพื่อดูรูปใหญ่" alt="" referrerpolicy="no-referrer" loading="lazy" style="width:56px;height:56px;object-fit:contain;background:#f8fafc;border-radius:8px;flex:none;cursor:zoom-in" onerror="this.style.visibility='hidden'">
+            <div><div style="margin-bottom:2px"><span style="display:inline-block;background:${brandTone(x.brand).solid};color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase">${isOur(x) ? "★ " : ""}${esc(x.brand)}</span></div>
+            <div class="text-sm font-semibold text-slate-900">${esc(x.code || x.title)}</div>${x.code ? `<div class="text-xs text-slate-500">${esc(x.title)}</div>` : ""}</div></div></td>
+          <td class="p-2 text-center font-bold" style="color:${scoreColor(x.matchScore)}">${x.matchScore}%</td>
+          <td class="p-2 text-right">${x.price != null || x.compareAt ? baht(onPromo(x) ? x.compareAt : x.price) : "–"}</td>
+          <td class="p-2 text-right">${onPromo(x) ? `<span class="font-semibold text-red-600">${baht(x.price)}</span> <span class="text-[11px] text-red-600">-${discountOf(x)}%</span>` : "–"}</td>
+          <td class="p-2 text-center"><a href="${esc(x.url)}" target="_blank" rel="noopener" class="font-semibold text-pink-600 hover:underline whitespace-nowrap">ดูสินค้า →</a></td>
+        </tr>`).join("");
+      box.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+        <div class="px-4 pt-3 pb-2 text-sm font-bold text-slate-900">📋 ตารางเปรียบเทียบสินค้า <span class="font-normal text-slate-400">(${tblRows.length} รุ่น · กดหัวคอลัมน์เพื่อเรียง)</span></div>
+        <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:12px;color:#64748b">แสดงในตาราง:</span>
+          <div style="display:inline-flex;gap:2px;background:#f1f5f9;border-radius:10px;padding:2px">${seg("top5", "5 รุ่นแรกของแบรนด์")}${seg("all", "ทั้งหมดที่พบ (" + tblSrc.full.length + ")")}${seg("pick", "เลือกรุ่นเอง")}</div></div>${picker}
+        <table class="w-full border-collapse text-sm"><thead><tr class="bg-slate-50 text-xs text-slate-500">
+          ${th("rank", "ลำดับ", "w-12")}${th("brand", "แบรนด์ / รุ่น", "text-left")}${th("pct", "% ความใกล้เคียง")}${th("reg", "ราคาปกติ", "text-right")}${th("promo", "ราคาโปรโมชั่น", "text-right")}${th("link", "ลิงก์")}
+        </tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+
     function renderGrouped(items) {
       const groups = {};
       items.forEach(x => (groups[x.brand] = groups[x.brand] || []).push(x));
@@ -897,7 +1113,9 @@
 
     /* ---------------- PDF report ---------------- */
     function buildReportHtml() {
-      let items = currentItems();
+      // v6.32: ตารางในรายงานใช้ข้อมูลชุดเดียวกับตารางบนหน้าจอ (โหมด 5 รุ่นแรก / ทั้งหมด / เลือกเอง และลำดับที่เรียงอยู่)
+      const ordered = tblRows.length ? tblOrdered() : currentItems().map((x, i) => ({ x: x, rank: i + 1 }));
+      let items = ordered.map(o => o.x);
       const r = lastResult || {}, ref = r.reference || {};
       const our = +$("ourPrice").value || 0;
       const now = new Date();
@@ -927,27 +1145,21 @@
         ? `กำลังลดราคา <b>${onSale.length} จาก ${items.length} รุ่น</b> · ลดสูงสุด ${discountOf(onSale[0])}% (${esc(onSale[0].brand)} ${esc(onSale[0].title)})`
         : `ไม่มีรุ่นใดกำลังลดราคาในขณะที่ตรวจ`);
       if (lowest30.length) insights.push(`ราคาต่ำสุดในรอบ 30 วัน: ${lowest30.map(x => esc(x.brand) + " " + esc(x.title)).join(", ")}`);
-      if (our && median) {
-        const cheaper = prices.filter(p => p < our).length;
-        insights.push(`ราคา Wacoal <b>${baht(our)}</b> ${our > median ? "สูงกว่า" : our < median ? "ต่ำกว่า" : "เท่ากับ"}ราคากลาง ${Math.abs(pct(our, median))}% · มีคู่แข่ง ${cheaper} จาก ${prices.length} รุ่นที่ราคาถูกกว่าเรา`);
-      }
 
       const tiles = [
         ["แบรนด์คู่แข่ง / รุ่น", `${brands.length} / ${items.length}`],
         ["ช่วงราคา", prices.length ? `${baht(prices[0])} – ${baht(prices[prices.length - 1])}` : "-"],
         ["ราคากลาง", median ? baht(median) : "-"],
-        ["กำลังลดราคา", `${onSale.length} รุ่น`],
-        ["ราคา Wacoal vs ราคากลาง", our && median ? `${our > median ? "+" : ""}${pct(our, median)}%` : "-"]
+        ["กำลังลดราคา", `${onSale.length} รุ่น`]
       ];
 
-      const rows = ourItems.concat(items).map((x, i) => {
+      const rows = ordered.map(({ x, rank }) => {
         const d = discountOf(x), pi = x.priceInsight;
         const insight = pi && pi.days >= 3
           ? (pi.isLowest ? "ต่ำสุด 30 วัน" : `ต่ำสุด ${baht(pi.min30)}`) + (pi.changeFromPrev ? ` · ${pi.changeFromPrev > 0 ? "▲" : "▼"}${Math.abs(pi.changeFromPrev)}%` : "")
           : "–";
-        const vs = our && x.price ? pct(x.price, our) : null;
         return `<tr>
-          <td class="c">${i + 1}</td>
+          <td class="c">${rank}</td>
           <td><div class="th">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}</div></td>
           <td><b>${isOur(x) ? "★ " : ""}${esc(x.brand)}</b><div>${esc(x.title)}</div><div class="mut">${esc(x.code || "")}</div></td>
           <td class="c"><b>${x.matchScore}%</b><div class="mut">รูป ${x.imageScore ?? "-"} · ราย ${x.textScore ?? "-"}</div></td>
@@ -955,14 +1167,13 @@
           <td class="c">${d ? `<span class="tag red">-${d}%</span>` : "–"}</td>
           <td>${esc(x.promoName || "–")}</td>
           <td class="c">${insight}</td>
-          <td class="c">${vs == null ? "–" : `<span class="${vs < 0 ? "amb" : "sky"}">${vs > 0 ? "+" : ""}${vs}%</span>`}</td>
           <td class="c">${x.url ? `<a href="${esc(x.url)}">เปิด</a>` : "–"}</td>
         </tr>`;
       }).join("");
 
-      const cards = ourItems.concat(items).map((x, i) => `
+      const cards = ordered.map(({ x, rank }) => `
         <div class="card">
-          <div class="cimg">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}<span class="rank">${i + 1}</span><span class="sc" style="border-color:${scoreColor(x.matchScore)}">${x.matchScore}%</span></div>
+          <div class="cimg">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}<span class="rank">${rank}</span><span class="sc" style="border-color:${scoreColor(x.matchScore)}">${x.matchScore}%</span></div>
           <div class="cb">
             <div class="br">${isOur(x) ? "★ " : ""}${esc(x.brand)}</div>
             <div class="tt">${esc(x.title)}</div>
@@ -1034,7 +1245,7 @@
 <div class="page">
   <div class="hd">
     <div><h1>รายงานเปรียบเทียบสินค้าคู่แข่ง</h1><div class="sub">Competitor Product &amp; Price Report · Product Intelligence</div></div>
-    <div class="meta">วันที่ตรวจ ${dateTh} เวลา ${timeTh} น.<br>มุมมอง: ${viewMode === "all" ? "แสดงทั้งหมด" : "แบรนด์ละ 1 รุ่น"} · เรียง: ${esc(sortLabel)}${$("saleOnly").checked ? " · เฉพาะที่ลดราคา" : ""}${hiddenBrands.size ? `<br>ซ่อนแบรนด์: ${esc([...hiddenBrands].join(", "))}` : ""}</div>
+    <div class="meta">วันที่ตรวจ ${dateTh} เวลา ${timeTh} น.<br>ตารางแสดง: ${tblMode === "all" ? "ทั้งหมดที่พบ" : tblMode === "pick" ? "รุ่นที่เลือกเอง" : "5 รุ่นแรกของแบรนด์"} (${allItems.length} รุ่น) · เรียง: ${esc(sortLabel)}${$("saleOnly").checked ? " · เฉพาะที่ลดราคา" : ""}${hiddenBrands.size ? `<br>ซ่อนแบรนด์: ${esc([...hiddenBrands].join(", "))}` : ""}</div>
   </div>
 
   <h2>1. สินค้าอ้างอิง</h2>
@@ -1053,7 +1264,7 @@
   <ul class="ins" style="margin-top:8px">${insights.map(t => `<li>${t}</li>`).join("")}</ul>
 
   <h2>3. ตารางเปรียบเทียบ (${allItems.length} รุ่น)</h2>
-  <table><thead><tr><th class="c">#</th><th>รูป</th><th>แบรนด์ / รุ่น</th><th class="c">ใกล้เคียง</th><th class="r">ราคา</th><th class="c">ส่วนลด</th><th>โปรโมชั่น</th><th class="c">ราคา 30 วัน</th><th class="c">vs เรา</th><th class="c">ลิงก์</th></tr></thead>
+  <table><thead><tr><th class="c">#</th><th>รูป</th><th>แบรนด์ / รุ่น</th><th class="c">ใกล้เคียง</th><th class="r">ราคา</th><th class="c">ส่วนลด</th><th>โปรโมชั่น</th><th class="c">ราคา 30 วัน</th><th class="c">ลิงก์</th></tr></thead>
   <tbody>${rows || `<tr><td colspan="10" class="c mut">ไม่มีข้อมูล</td></tr>`}</tbody></table>
 
   <h2 class="pb">4. รายละเอียดรายรุ่น</h2>
@@ -1079,7 +1290,7 @@
     }
 
     function exportPdf() {
-      if (!lastResult || !currentItems().length) return;
+      if (!lastResult || !tblRows.length) return;
       const html = buildReportHtml();
       const w = window.open("", "_blank");
       if (w) { w.document.open(); w.document.write(html); w.document.close(); return; }
@@ -1092,14 +1303,14 @@
 
     /* ---------------- export ---------------- */
     function exportCsv() {
-      const items = currentItems();
+      const items = tblOrdered().map(o => o.x);   // v6.32: ข้อมูลชุดเดียวกับตารางบนหน้าจอ
       if (!items.length) return;
       const our = +$("ourPrice").value || "";
       const head = ["แบรนด์", "ชื่อรุ่น", "รหัส", "ความใกล้เคียง %", "คะแนนรูป %", "คะแนนรายละเอียด %", "ราคาขาย", "ราคาปกติ", "ส่วนลด %",
-                    "ราคาต่ำสุด 30 วัน", "ต่างจากราคาเรา %", "โปรโมชั่น", "รูปทรงที่เหมือน", "รูปทรงที่ต่าง", "AI วิเคราะห์รายละเอียด", "แหล่งข้อมูล", "ลิงก์", "วันที่ตรวจ"];
+                    "ราคาต่ำสุด 30 วัน", "โปรโมชั่น", "รูปทรงที่เหมือน", "รูปทรงที่ต่าง", "AI วิเคราะห์รายละเอียด", "แหล่งข้อมูล", "ลิงก์", "วันที่ตรวจ"];
       const today = new Date().toLocaleDateString("th-TH");
       const rows = items.map(x => [x.brand, x.title, x.code || "", x.matchScore, x.imageScore ?? "", x.textScore ?? "", x.price ?? "", x.compareAt ?? "",
-        discountOf(x) || "", x.priceInsight ? x.priceInsight.min30 : "", our && x.price ? Math.round((x.price - our) / our * 100) : "",
+        discountOf(x) || "", x.priceInsight ? x.priceInsight.min30 : "",
         x.promoName || "", x.similar || "", x.different || "", x.detail || "", x.source || "", x.url || "", today]);
       const csv = "﻿" + [head].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
       const a = document.createElement("a");
@@ -1185,7 +1396,6 @@
         ${row("ราคาปกติ / ส่วนลด", x => x.compareAt ? `<s class="text-slate-400">${baht(x.compareAt)}</s> <span class="text-red-600 font-semibold">-${discountOf(x)}%</span>` : "–")}
         ${row("โปรโมชั่น", x => x.promoName ? esc(x.promoName) : "–")}
         ${row("ราคาต่ำสุด 30 วัน", x => x.priceInsight && x.priceInsight.days >= 3 ? baht(x.priceInsight.min30) + (x.priceInsight.isLowest ? " 🔻" : "") : "–")}
-        ${our ? row("ต่างจากราคาเรา", x => x.price ? `${x.price > our ? "+" : ""}${Math.round((x.price - our) / our * 100)}%` : "–") : ""}
         ${row("ความใกล้เคียงรูป", x => x.imageScore != null ? `<b>${x.imageScore}%</b>` : "–")}
         ${row("คะแนนรวม", x => `<b>${x.matchScore}%</b>`)}
         ${ATTR_ROWS.map(([k, l, y, n]) => row(l, x => attrCell(x, k, y, n))).join("")}
@@ -1494,7 +1704,7 @@
       const chip = "text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-white hover:border-pink-400 text-slate-600";
       $("histBox").innerHTML = (hist.length ? `<div class="flex flex-wrap items-center gap-1.5"><span class="text-[11px] text-slate-400">🕘 ค้นล่าสุด</span>${hist.map((h, i) => `<button type="button" onclick="useHist(${i})" class="${chip}">${esc(h.q.slice(0, 22))}</button>`).join("")}</div>` : "")
         + `<div class="flex flex-wrap items-center gap-1.5"><span class="text-[11px] text-slate-400">⭐ ชุดเงื่อนไข</span>${presets.map((p, i) => `<span class="${chip} inline-flex items-center gap-1"><button type="button" onclick="usePreset(${i})">${esc(p.name)}</button><button type="button" onclick="delPreset(${i})" class="text-slate-400 hover:text-red-600">✕</button></span>`).join("")}
-          <button type="button" onclick="savePreset()" class="text-[11px] px-2 py-0.5 rounded-full border border-dashed border-slate-300 text-slate-500 hover:border-pink-400">+ บันทึกคำค้น/ตัวกรอง/โหมดสีตอนนี้</button></div>`;
+          <button type="button" onclick="savePreset()" class="text-[11px] px-2 py-0.5 rounded-full border border-dashed border-slate-300 text-slate-500 hover:border-pink-400">+ บันทึกคำค้น/ตัวกรองตอนนี้</button></div>`;
     }
     renderHist();
     /* ถอดเสียงจากวิดีโอ: ถอดรหัสเสียงในเบราว์เซอร์ → WAV 16kHz mono (≤60 วินาที) → ให้ AI ถอดเป็นข้อความ */
