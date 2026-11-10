@@ -254,6 +254,9 @@
           <label class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 cursor-pointer select-none">
             <input type="checkbox" id="saleOnly" onchange="rerender()" class="rounded border-slate-300 text-pink-600"> เฉพาะที่ลดราคา
           </label>
+          <select id="minPct" onchange="setMinPct(this.value)" title="ซ่อนรุ่นที่ความใกล้เคียงต่ำกว่านี้" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">
+            <option value="30">ขั้นต่ำ 30%</option><option value="40">ขั้นต่ำ 40%</option><option value="50">ขั้นต่ำ 50%</option><option value="60">ขั้นต่ำ 60%</option><option value="70">ขั้นต่ำ 70%</option>
+          </select>
           <select id="sortBy" onchange="rerender()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white">
             <option value="brand">เรียง: แบรนด์ → % ใกล้เคียง</option>
             <option value="score">เรียง: ใกล้เคียงที่สุด</option>
@@ -335,6 +338,8 @@
     function paintColorMode() {}
     function setColorMode() {}
     let hiddenBrands = new Set();
+    let minPct = Math.max(30, Math.min(90, parseInt(store.get("pis_minpct", "50"), 10) || 50));   // v6.36: ซ่อนรุ่นที่รูปทรงไม่ใกล้เคียง (ค่าเริ่มต้น 50%)
+    function setMinPct(v) { minPct = +v || 30; store.set("pis_minpct", String(minPct)); rerender(); }
     let expandedBrands = new Set(), _brandTotals = {}, tblMode = "top5", tblPick = new Set(), tblSrc = { top5: [], full: [] };   // v6.31
     let offKeys = new Set(), serverRelax = [], lastQuery = "";
     const PER_BRAND_SHOW = 5;   // v6.23: แสดงผลแบรนด์ละ 5 รุ่น (1 แถวต่อแบรนด์)
@@ -458,7 +463,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.34";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.36";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -642,8 +647,9 @@
       const coreKeys = new Set(constraintsOf().filter(k => k.core).map(k => k.key));
       const modelKeys = new Set(constraintsOf().filter(k => k.source === "model").map(k => k.key));   // ข้อมูลรุ่นหักคะแนนอย่างเดียว ไม่ย้ายไปกลุ่มพับ
       const isBad = x => failsOf(x, act).some(k => !modelKeys.has(k) && (!hasImgRef || coreKeys.has(k)));
-      const bad = pool.filter(isBad);
-      const ok = pool.filter(x => !isBad(x));
+      // v6.35: รุ่นที่ขัดเงื่อนไขไม่ถูกแยกไปกลุ่มพับอีกต่อไป — อยู่ในแบรนด์ของตัวเอง ต่อท้ายรุ่นที่ตรงเงื่อนไข (ไม่ว่ากี่ %) พร้อมป้าย ✗
+      pool = pool.map(x => Object.assign({}, x, { _bad: isBad(x) }));
+      const bad = [], ok = pool;
       // v6.23: แบรนด์ละ 5 รุ่น (เรียงตาม % ความใกล้เคียง) — โหมด "แสดงทั้งหมด" เก็บรุ่นที่เหลือ (≥ 30%) ไว้ในกลุ่มพับ
       const byB = {};
       ok.forEach(x => (byB[x.brand] = byB[x.brand] || []).push(x));
@@ -651,7 +657,7 @@
       let main = [], weak = [], top5 = [], full = [];
       _brandTotals = {};
       Object.keys(byB).forEach(b => {
-        const arr = byB[b].filter(x => x.matchScore >= 30).sort(byScore);
+        const arr = byB[b].filter(x => x.matchScore >= minPct).sort((a, c) => ((a._bad ? 1 : 0) - (c._bad ? 1 : 0)) || byScore(a, c));
         _brandTotals[b] = arr.length;
         main = main.concat(viewMode === "all" && expandedBrands.has(b) ? arr : arr.slice(0, PER_BRAND_SHOW));   // v6.33: "แบรนด์ละ 5 รุ่น" = 5 รุ่นเสมอ ไม่มีปุ่ม · "แสดงทั้งหมด" = มีปุ่ม "แสดงเพิ่มเติม" ให้กดขยายทีละแบรนด์
         top5 = top5.concat(arr.slice(0, PER_BRAND_SHOW)); full = full.concat(arr);                            // ใช้กับตารางเปรียบเทียบ (เลือกโหมดแยกต่างหาก)
@@ -749,7 +755,7 @@
     function sortItems(items) {
       const s = $("sortBy").value;
       const sorters = {
-        brand: (a, b) => (isOur(b) - isOur(a)) || String(a.brand).localeCompare(String(b.brand), "en") || b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),   // Wacoal ก่อน → แบรนด์ A–Z → % มากไปน้อย
+        brand: (a, b) => (isOur(b) - isOur(a)) || String(a.brand).localeCompare(String(b.brand), "en") || ((a._bad ? 1 : 0) - (b._bad ? 1 : 0)) || b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),   // Wacoal ก่อน → แบรนด์ A–Z → % มากไปน้อย
         score: (a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0),
         priceAsc: (a, b) => (a.price ?? 1e9) - (b.price ?? 1e9),
         priceDesc: (a, b) => (b.price ?? -1) - (a.price ?? -1),
@@ -960,8 +966,8 @@
         const tone = brandTone(b);
         const btnCss = `border:2px dashed ${tone.solid};background:${tone.tint};color:${tone.solid};border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.5;padding:10px 6px;text-align:center`;
         const btn = !more ? "" : expanded
-          ? `<button type="button" data-b="${esc(b)}" onclick="toggleBrand(this.dataset.b)" style="${btnCss};min-height:72px">▲ ย่อกลับ<br>เหลือ ${PER_BRAND_SHOW} รุ่น</button>`
-          : `<button type="button" data-b="${esc(b)}" onclick="toggleBrand(this.dataset.b)" style="${btnCss}">+ แสดงเพิ่มเติม<br>อีก ${total - n} รุ่น ›</button>`;
+          ? `<button type="button" data-b="${esc(b)}" onclick="expandBrand(this.dataset.b)" style="${btnCss};min-height:72px">▲ ย่อกลับ<br>เหลือ ${PER_BRAND_SHOW} รุ่น</button>`
+          : `<button type="button" data-b="${esc(b)}" onclick="expandBrand(this.dataset.b)" style="${btnCss}">+ แสดงเพิ่มเติม<br>อีก ${total - n} รุ่น ›</button>`;
         const cols = more && !expanded ? `repeat(${PER_BRAND_SHOW},minmax(185px,1fr)) 112px` : `repeat(${PER_BRAND_SHOW},minmax(185px,1fr))`;
         return `
         <section class="col-span-full">
@@ -974,7 +980,7 @@
         </section>`;
       }).join("");
     }
-    function toggleBrand(b) { expandedBrands.has(b) ? expandedBrands.delete(b) : expandedBrands.add(b); rerender(); }
+    function expandBrand(b) { expandedBrands.has(b) ? expandedBrands.delete(b) : expandedBrands.add(b); rerender(); }
     /** ตารางเปรียบเทียบ: ลำดับ · รูป+แบรนด์/รุ่น · % ความใกล้เคียง · ราคาปกติ · ราคาโปรโมชั่น · ลิงก์ — กดหัวคอลัมน์เพื่อเรียง (▲▼) */
     let tblRows = [], tblSort = { key: "rank", dir: 1 };
     const onPromo = x => x.compareAt && x.price && x.compareAt > x.price;
@@ -1736,7 +1742,7 @@
         .then(() => { row.innerHTML = `<span class="text-emerald-600 font-semibold">✓ บันทึกแล้ว (${verdict === "good" ? "ตรง" : "ไม่ตรง"})</span>`; })
         .catch(e => { row.innerHTML = `<span class="text-red-600">บันทึกไม่ได้: ${esc((e.message || "").slice(0, 80))}</span>`; });
     }
-    paintColorMode(); paintMic();
+    paintColorMode(); paintMic(); $("minPct").value = String(minPct);
     setTab("search");
   </script>
 </body>
