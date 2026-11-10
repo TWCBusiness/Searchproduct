@@ -197,6 +197,11 @@
             </div>
           </div>
           <div id="suggestBox" class="hidden"></div>
+          <div id="basisBox" style="display:none;border:1px solid #fbcfe8;background:#fdf2f8;border-radius:12px;padding:8px 10px">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:12px;font-weight:700;color:#9d174d">🖼 พบรูปอ้างอิงแล้ว · ค้นด้วย:</span>
+              <div style="display:inline-flex;gap:2px;background:#fff;border-radius:10px;padding:2px;border:1px solid #fbcfe8"><button id="basisImg" type="button" onclick="setBasis('image')" style="border:0;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer">รูปอย่างเดียว</button><button id="basisBoth" type="button" onclick="setBasis('both')" style="border:0;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer">รูป + รายละเอียด</button></div></div>
+            <div id="basisHint" style="font-size:11px;color:#9d174d;margin-top:4px"></div>
+          </div>
           <div id="filterNote" class="hidden text-[11px] text-slate-600 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5"></div>
           <div id="histBox" class="space-y-1.5"></div>
           <p class="text-xs text-slate-400">ค้นจาก Sabina · B'me · Wienna · Uniqlo · BSC · Triumph (เว็บ official) + แบรนด์ที่ทีมกรอกใน Google Sheet · ราคาอัปเดตอัตโนมัติทุกวัน</p>
@@ -249,7 +254,7 @@
           <button id="modeBest" onclick="setViewMode('best')" class="px-3 py-1.5 rounded-md">แบรนด์ละ 5 รุ่น</button>
           <button id="modeAll" onclick="setViewMode('all')" class="px-3 py-1.5 rounded-md">แสดงทั้งหมด</button>
         </div>
-        <div id="brandFilter" class="flex gap-1.5 overflow-x-auto scroll-x flex-1"></div>
+        <div id="brandFilter" class="flex gap-1.5 flex-1" style="flex-wrap:wrap"></div>
         <div class="flex items-center gap-2 flex-wrap">
           <label class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 cursor-pointer select-none">
             <input type="checkbox" id="saleOnly" onchange="rerender()" class="rounded border-slate-300 text-pink-600"> เฉพาะที่ลดราคา
@@ -340,7 +345,18 @@
     let hiddenBrands = new Set();
     let minPct = Math.max(30, Math.min(90, parseInt(store.get("pis_minpct", "50"), 10) || 50));   // v6.36: ซ่อนรุ่นที่รูปทรงไม่ใกล้เคียง (ค่าเริ่มต้น 50%)
     function setMinPct(v) { minPct = +v || 30; store.set("pis_minpct", String(minPct)); rerender(); }
-    let expandedBrands = new Set(), _brandTotals = {}, tblMode = "top5", tblPick = new Set(), tblSrc = { top5: [], full: [] };   // v6.31
+    // v6.37: เลือกฐานการค้นเมื่อมีรูปอ้างอิง — รูปอย่างเดียว (ไม่ใช้ข้อความ/ตัวกรอง/ข้อมูลรุ่น) หรือ รูป + รายละเอียด
+    let basis = store.get("pis_basis", "both") === "image" ? "image" : "both", lastImgOnly = false;
+    function syncBasis() {
+      const has = !$("imagePreview").classList.contains("hidden") && !!$("imagePreview").getAttribute("src");
+      $("basisBox").style.display = has ? "block" : "none";
+      const on = "background:#db2777;color:#fff", off = "background:transparent;color:#64748b";
+      $("basisImg").style.cssText += ";" + (basis === "image" ? on : off); $("basisBoth").style.cssText += ";" + (basis === "both" ? on : off);
+      $("basisHint").textContent = basis === "image" ? "ค้นจากรูปทรงล้วนๆ — ไม่ใช้รหัสรุ่น ข้อความ หรือตัวกรอง (ข้อความที่พิมพ์ไว้ไม่ถูกนำไปค้น ไม่ต้องล้าง)" : "ใช้รูปเป็นหลัก แล้วเทียบรายละเอียด/ตัวกรองต่อ (คะแนนรูป 70% + รายละเอียด 30% เมื่อรูปทรงผ่านเกณฑ์)";
+    }
+    function setBasis(m) { basis = m; store.set("pis_basis", m); syncBasis(); }
+    setInterval(syncBasis, 500);
+    let expandedBrands = new Set(), _brandTotals = {}, tblMode = "top5", tblPick = new Set(), tblSrc = { top5: [], full: [] }, tblExpanded = new Set();   // v6.31
     let offKeys = new Set(), serverRelax = [], lastQuery = "";
     const PER_BRAND_SHOW = 5;   // v6.23: แสดงผลแบรนด์ละ 5 รุ่น (1 แถวต่อแบรนด์)
     const WEAK_MIN = 40, WEAK_GAP = 25;   // โหมดทั้งหมด: รุ่นที่ได้ต่ำกว่า 50% หรือห่างจากรุ่นดีสุดของแบรนด์เกิน 20 คะแนน → พับไว้
@@ -463,7 +479,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.36";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.37";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -572,27 +588,28 @@
       const typed = $("searchInput").value.trim();
       if (!typed && !selectedBase64Image && !filterSel.size) { $("searchInput").focus(); return; }
       const query = typed;
-      const relax = (opts && opts.relax ? opts.relax : []).concat(opts && opts.noModel ? ["_nomodel"] : []).slice().sort();
+      const imgOnly = basis === "image" && !$("imagePreview").classList.contains("hidden") && !!$("imagePreview").getAttribute("src");
+      const relax = (opts && opts.relax ? opts.relax : []).concat(opts && opts.noModel ? ["_nomodel"] : []).concat(imgOnly ? ["_imgonly"] : []).slice().sort();
       const seq = ++searchSeq;
-      const fsig = filtersList().join(",");
+      const fsig = imgOnly ? "-" : filtersList().join(",");
       const key = cacheKey(query + "#" + relax.join(",") + "#" + fsig + "#" + colorMode, selectedBase64Image);
       const hit = (opts && opts.fresh) ? null : cacheGet(key);
       $("searchBtn").disabled = true;
       if (!hit) startProgress();
       const t0 = Date.now();
       try {
-        const r = hit || await callApi({ query, image: selectedBase64Image, relax, filters: filtersList(), colorMode, ourPrice: +$("ourPrice").value || 0, fresh: !!(opts && opts.fresh), token: store.get("pis_token", "") });
+        const r = hit || await callApi({ query, image: selectedBase64Image, relax, filters: imgOnly ? [] : filtersList(), colorMode, ourPrice: +$("ourPrice").value || 0, fresh: !!(opts && opts.fresh), token: store.get("pis_token", "") });
         if (seq !== searchSeq) return;
         // ตรวจว่าผลที่ได้เป็นของ "คำค้นที่กรอกอยู่จริง" (กันผลเก่าปนมา) → ถ้าไม่ตรง ทิ้งแคชแล้วค้นใหม่ 1 ครั้ง
         const echoed = r && r.reference && typeof r.reference.query === "string" ? r.reference.query.trim() : null;
-        if (echoed !== null && echoed !== query && !(opts && opts.retried)) {
+        if (echoed !== null && echoed !== (imgOnly ? "" : query) && !(opts && opts.retried)) {
           memCache.delete(key); try { sessionStorage.removeItem(key); } catch (e) {}
           await executeRealSearch(Object.assign({}, opts, { fresh: true, retried: true }));
           return;
         }
         if (!hit) cacheSet(key, r);
         stopProgress();
-        hiddenBrands = new Set(); expandedBrands = new Set(); tblPick = new Set();
+        hiddenBrands = new Set(); expandedBrands = new Set(); tblPick = new Set(); tblExpanded = new Set(); lastImgOnly = imgOnly;
         lastResult = r; serverRelax = relax; lastQuery = query; cmpSel = [];
         offKeys = new Set(((r.reference || {}).constraints || []).filter(k => k.off).map(k => k.key));
         $("cacheBadge").classList.toggle("hidden", !hit);
@@ -612,7 +629,7 @@
       $("resultSection").classList.remove("hidden");
       const ref = r.reference || {};
       $("refSummary").textContent = ref.summary || ref.query || "-";
-      const typedNow = $("searchInput").value.trim(), echoed = (ref.query || "").trim();
+      const typedNow = lastImgOnly ? "" : $("searchInput").value.trim(), echoed = (ref.query || "").trim();
       $("queryEcho").innerHTML = echoed !== typedNow
         ? `<span class="text-red-600 font-semibold">⚠ ผลนี้เป็นของคำค้น “${esc(echoed) || "(รูปอย่างเดียว)"}” ไม่ตรงกับที่กรอก — กดค้นหาอีกครั้ง</span>`
         : (echoed ? `ค้นด้วยข้อความ: “${esc(echoed)}”` : "ค้นจากรูปอย่างเดียว (ไม่ได้พิมพ์รายละเอียด)");
@@ -698,7 +715,7 @@
           const mine = allp.filter(x => x.brand === h.b && sk(x) === h.k).sort((a, b) => b.matchScore - a.matchScore)[0];
           if (!mine) return card("info", name, "ได้คะแนนถึงเกณฑ์ แต่ไม่พบในรายการที่แสดง");
           const rank = allp.filter(x => x.brand === h.b).sort((a, b) => b.matchScore - a.matchScore || (b.imageScore || 0) - (a.imageScore || 0)).findIndex(x => x.id === mine.id) + 1;
-          const score = `ได้ ${mine.matchScore}%` + (mine.imageScore != null ? ` (รูปทรง ${mine.imageScore}%×70% + รายละเอียด ${mine.textScore ?? "-"}%×30%${mine.rawScore != null && mine.rawScore !== mine.matchScore ? " − ค่าปรับเงื่อนไข " + (mine.rawScore - mine.matchScore) : ""})` : "");
+          const score = `ได้ ${mine.matchScore}%` + (mine.imageScore != null && d.shapeGate && mine.imageScore < d.shapeGate ? ` (คะแนนรูปทรงล้วน ${mine.imageScore}% — ต่ำกว่า ${d.shapeGate}% จึงไม่นำรายละเอียดมาคิด)` : mine.imageScore != null ? ` (รูปทรง ${mine.imageScore}%×70% + รายละเอียด ${mine.textScore ?? "-"}%×30%${mine.rawScore != null && mine.rawScore !== mine.matchScore ? " − ค่าปรับเงื่อนไข " + (mine.rawScore - mine.matchScore) : ""})` : "");
           const inMain = g.main.some(x => x.id === mine.id), inWeak = g.weak.some(x => x.id === mine.id), inBad = g.bad.some(x => x.id === mine.id);
           if (inMain) return card("ok", name + " — ขึ้นในผลแล้ว", `${score} · อันดับ ${rank} ของแบรนด์ ${esc(h.b)}` + (mine.different ? `<br>ต่างจากสินค้าอ้างอิง: ${esc(mine.different)}` : ""));
           if (hiddenBrands.has(h.b)) return card("warn", name + " — ถูกซ่อน", `${score} · แต่คุณปิดแบรนด์ ${esc(h.b)} ไว้ (ชิปแบรนด์ด้านบนผลลัพธ์)`);
@@ -889,7 +906,7 @@
 
     function renderBrandFilter() {
       const all = (lastResult.all || []).length ? lastResult.all : (lastResult.data || []);
-      const counts = {}; all.forEach(x => counts[x.brand] = (counts[x.brand] || 0) + 1);
+      const counts = {}; all.forEach(x => { counts[x.brand] = counts[x.brand] || 0; if ((x.matchScore || 0) >= minPct) counts[x.brand]++; });   // ครบทุกแบรนด์ที่มีข้อมูล · ตัวเลข = รุ่นที่ถึงขั้นต่ำ
       $("brandFilter").innerHTML = Object.keys(counts).sort((a, b) => (b === OUR_BRAND) - (a === OUR_BRAND)).map(b => {
         const off = hiddenBrands.has(b);
         return `<button data-brand="${esc(b)}" onclick="toggleBrand(this.dataset.brand)" class="whitespace-nowrap px-2.5 py-1 rounded-full text-xs border ${off ? "border-slate-200 text-slate-400 line-through" : "border-pink-200 bg-pink-50 text-pink-600"}">${b === OUR_BRAND ? "★ " : ""}${esc(b)} ${viewMode === "all" ? counts[b] : ""}</button>`;
@@ -997,7 +1014,13 @@
       paintResultTable();
     }
     function renderResultTable(g) { tblSrc = g; tblPaintAll(); }
-    function tblItems() { return tblMode === "all" ? tblSrc.full : tblMode === "pick" ? tblSrc.full.filter(x => tblPick.has(x.id)) : tblSrc.top5; }
+    function tblItems() {
+      if (tblMode === "all") return tblSrc.full;
+      if (tblMode === "pick") return tblSrc.full.filter(x => tblPick.has(x.id));
+      const t5 = new Set(tblSrc.top5.map(x => x.id));   // 5 รุ่นแรกของแต่ละแบรนด์ + แบรนด์ที่กด "แสดงเพิ่มเติม" แสดงครบ
+      return tblSrc.full.filter(x => t5.has(x.id) || tblExpanded.has(x.brand));
+    }
+    function tblMore(b) { tblExpanded.has(b) ? tblExpanded.delete(b) : tblExpanded.add(b); tblPaintAll(); }
     function tblPaintAll() { tblRows = tblItems().map((x, i) => ({ x: x, rank: i + 1 })); paintResultTable(); }   // ลำดับ = ลำดับเดิม ติดกับรุ่น ไม่เปลี่ยนตามการเรียง
     function setTblMode(m) { tblMode = m; if (m === "pick" && !tblPick.size) tblSrc.top5.forEach(x => tblPick.add(x.id)); tblPaintAll(); }
     function tblToggle(id) { tblPick.has(id) ? tblPick.delete(id) : tblPick.add(id); tblPaintAll(); }
@@ -1064,6 +1087,13 @@
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px"><b style="font-size:12px;color:#334155">เลือกรุ่นที่จะเทียบ · เลือกแล้ว ${tblPick.size} จาก ${tblSrc.full.length} รุ่น</b>${act("all", "เลือกทั้งหมด")}${act("top5", "5 รุ่นแรกของแต่ละแบรนด์")}${act("none", "ล้างที่เลือก")}</div>
           ${ord.map(b => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px"><span style="display:inline-block;min-width:74px;background:${brandTone(b).solid};color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700;text-transform:uppercase;text-align:center">${esc(b)}</span>${byb[b].map(x => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${tblPick.has(x.id) ? brandTone(b).solid : "#e2e8f0"};background:${tblPick.has(x.id) ? brandTone(b).tint : "#fff"};border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer"><input type="checkbox" data-id="${esc(x.id)}" ${tblPick.has(x.id) ? "checked" : ""} onchange="tblToggle(this.dataset.id)">${esc(x.code || x.title)} <b style="color:${scoreColor(x.matchScore)}">${x.matchScore}%</b></label>`).join("")}</div>`).join("")}</div>`;
       }
+      let moreBar = "";
+      if (tblMode === "top5") {
+        const tot = {}; tblSrc.full.forEach(x => tot[x.brand] = (tot[x.brand] || 0) + 1);
+        const bs = Object.keys(tot).filter(b => tot[b] > PER_BRAND_SHOW);
+        if (bs.length) moreBar = `<div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px solid #f1f5f9"><span style="font-size:12px;color:#64748b">แบรนด์ที่มีเกิน ${PER_BRAND_SHOW} รุ่น:</span>${bs.map(b => { const t = brandTone(b), open = tblExpanded.has(b);
+          return `<button type="button" data-b="${esc(b)}" onclick="tblMore(this.dataset.b)" style="border:2px dashed ${t.solid};background:${t.tint};color:${t.solid};border-radius:10px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer">${open ? "▲ ย่อ " + esc(b) : "+ แสดงเพิ่มเติม " + esc(b) + " (อีก " + (tot[b] - PER_BRAND_SHOW) + " รุ่น)"}</button>`; }).join("")}</div>`;
+      }
       const emptyRow = list.length ? "" : `<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">ยังไม่ได้เลือกรุ่น — ติ๊กรุ่นที่ต้องการเทียบในกรอบด้านบน</td></tr>`;
       const rows = refRow + emptyRow + list.map(({ x, rank }) => `
         <tr class="border-t border-slate-100" style="background:${brandTone(x.brand).tint}">
@@ -1083,7 +1113,7 @@
           <div style="display:inline-flex;gap:2px;background:#f1f5f9;border-radius:10px;padding:2px">${seg("top5", "5 รุ่นแรกของแบรนด์")}${seg("all", "ทั้งหมดที่พบ (" + tblSrc.full.length + ")")}${seg("pick", "เลือกรุ่นเอง")}</div></div>${picker}
         <table class="w-full border-collapse text-sm"><thead><tr class="bg-slate-50 text-xs text-slate-500">
           ${th("rank", "ลำดับ", "w-12")}${th("brand", "แบรนด์ / รุ่น", "text-left")}${th("pct", "% ความใกล้เคียง")}${th("reg", "ราคาปกติ", "text-right")}${th("promo", "ราคาโปรโมชั่น", "text-right")}${th("link", "ลิงก์")}
-        </tr></thead><tbody>${rows}</tbody></table></div>`;
+        </tr></thead><tbody>${rows}</tbody></table>${moreBar}</div>`;
     }
 
     function renderGrouped(items) {
