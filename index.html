@@ -204,7 +204,7 @@
           </div>
           <div id="filterNote" class="hidden text-[11px] text-slate-600 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5"></div>
           <div id="histBox" class="space-y-1.5"></div>
-          <p class="text-xs text-slate-400">ค้นจาก Sabina · B'me · Wienna · Uniqlo · BSC · Triumph (เว็บ official) + แบรนด์ที่ทีมกรอกใน Google Sheet · ราคาอัปเดตอัตโนมัติทุกวัน</p>
+          <p class="text-xs text-slate-400">ค้นจาก Sabina · B'me · Wienna · Uniqlo · BSC · Triumph · Guy Laroche (เว็บ official) + แบรนด์ที่ทีมกรอกใน Google Sheet · ราคาอัปเดตอัตโนมัติทุกวัน</p>
         </div>
       </div>
     </section>
@@ -351,14 +351,16 @@
       const has = !$("imagePreview").classList.contains("hidden") && !!$("imagePreview").getAttribute("src");
       $("basisBox").style.display = has ? "block" : "none";
       const on = "background:#db2777;color:#fff", off = "background:transparent;color:#64748b";
-      $("basisImg").style.cssText += ";" + (basis === "image" ? on : off); $("basisBoth").style.cssText += ";" + (basis === "both" ? on : off);
+      [["basisImg", "aiBasisImg"], ["basisBoth", "aiBasisBoth"]].forEach(([a, b], i) => [a, b].forEach(id => { const el = $(id); if (el) el.style.cssText += ";" + ((i === 0) === (basis === "image") ? on : off); }));
       $("basisHint").textContent = basis === "image" ? "ค้นจากรูปทรงล้วนๆ — ไม่ใช้รหัสรุ่น ข้อความ หรือตัวกรอง (ข้อความที่พิมพ์ไว้ไม่ถูกนำไปค้น ไม่ต้องล้าง)" : "ใช้รูปเป็นหลัก แล้วเทียบรายละเอียด/ตัวกรองต่อ (คะแนนรูป 70% + รายละเอียด 30% เมื่อรูปทรงผ่านเกณฑ์)";
     }
+    let pickedCode = "", lastPick = null;
+    function reapplyPick() { setBasis("both"); if (lastPick) pickSuggest(lastPick[0], lastPick[1], lastPick[2], lastPick[3]); }
     function setBasis(m) { basis = m; store.set("pis_basis", m); syncBasis(); }
     setInterval(syncBasis, 500);
     let expandedBrands = new Set(), _brandTotals = {}, tblMode = "top5", tblPick = new Set(), tblSrc = { top5: [], full: [] }, tblExpanded = new Set();   // v6.31
     let offKeys = new Set(), serverRelax = [], lastQuery = "";
-    const PER_BRAND_SHOW = 5;   // v6.23: แสดงผลแบรนด์ละ 5 รุ่น (1 แถวต่อแบรนด์)
+    const PER_BRAND_SHOW = 5, WACOAL_SHOW = 5, showN = b => b === OUR_BRAND ? WACOAL_SHOW : PER_BRAND_SHOW;   // v6.23: แสดงผลแบรนด์ละ 5 รุ่น (1 แถวต่อแบรนด์)
     const WEAK_MIN = 40, WEAK_GAP = 25;   // โหมดทั้งหมด: รุ่นที่ได้ต่ำกว่า 50% หรือห่างจากรุ่นดีสุดของแบรนด์เกิน 20 คะแนน → พับไว้
 
     /* ---------------- status / warm-up ---------------- */
@@ -367,7 +369,7 @@
       fetch(GAS_API_URL + "?ping=1").then(r => r.json()).then(j => {
         $("statusDot").className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
         $("statusPill").className = "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700";
-        $("statusText").textContent = "พร้อมใช้งาน · v" + j.version;
+        $("statusText").textContent = "พร้อมใช้งาน · เซิร์ฟเวอร์ v" + j.version + " · หน้าเว็บ v" + APP_VER;
       }).catch(() => { $("statusText").textContent = "เชื่อมต่อไม่ได้"; $("statusDot").className = "w-1.5 h-1.5 rounded-full bg-red-500"; });
     });
 
@@ -479,7 +481,7 @@
 
     /* ---------------- client cache (6 ชม.) ---------------- */
     const CLIENT_CACHE_MS = 6 * 3600e3, memCache = new Map();
-    const APP_VER = "6.37";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
+    const APP_VER = "6.45";   // เปลี่ยนเลขนี้เมื่ออัปเดตหน้าเว็บ/Code.gs → ผลที่จำไว้จากเวอร์ชันก่อนจะไม่ถูกนำมาใช้
     // แฮชทุกตัวอักษร (เดิมสุ่มอ่านทุกตัวที่ 7 → ข้อความต่างกันนิดเดียวได้คีย์เดียวกัน แล้วดึงผลเก่ามาแสดง)
     function hash53(str) {
       let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -586,9 +588,9 @@
     /* ---------------- search ---------------- */
     async function executeRealSearch(opts) {
       const typed = $("searchInput").value.trim();
-      if (!typed && !selectedBase64Image && !filterSel.size) { $("searchInput").focus(); return; }
-      const query = typed;
+      if (!typed && !selectedBase64Image && !filterSel.size && !(autoPrev && pickedCode)) { $("searchInput").focus(); return; }
       const imgOnly = basis === "image" && !$("imagePreview").classList.contains("hidden") && !!$("imagePreview").getAttribute("src");
+      const query = typed || (imgOnly && !selectedBase64Image && autoPrev ? pickedCode : "");   // รูปอย่างเดียว + โหลดรูปในเบราว์เซอร์ไม่ได้ → ส่งรหัสให้เซิร์ฟเวอร์หารูปเอง
       const relax = (opts && opts.relax ? opts.relax : []).concat(opts && opts.noModel ? ["_nomodel"] : []).concat(imgOnly ? ["_imgonly"] : []).slice().sort();
       const seq = ++searchSeq;
       const fsig = imgOnly ? "-" : filtersList().join(",");
@@ -654,7 +656,7 @@
       pool = pool.map(x => {
         if (x.rawScore == null) return x;
         const pen = Math.min(30, Object.keys(x.pen || {}).filter(k => act.has(k)).reduce((n, k) => n + x.pen[k], 0));
-        return Object.assign({}, x, { matchScore: x.rawScore >= 30 ? Math.max(30, x.rawScore - pen) : x.rawScore });   // หักได้ แต่ไม่ต่ำกว่า 30 (ตรงกับฝั่งเซิร์ฟเวอร์)
+        return Object.assign({}, x, { matchScore: x.rawScore });   // v6.43: ไม่หักคะแนนเงื่อนไข (รายละเอียดคิดใน 30% แล้ว)   // หักได้ แต่ไม่ต่ำกว่า 30 (ตรงกับฝั่งเซิร์ฟเวอร์)
       });
       pool = pool.filter(x => !hiddenBrands.has(x.brand));
       if ($("saleOnly").checked) pool = pool.filter(x => discountOf(x) > 0);
@@ -676,8 +678,8 @@
       Object.keys(byB).forEach(b => {
         const arr = byB[b].filter(x => x.matchScore >= minPct).sort((a, c) => ((a._bad ? 1 : 0) - (c._bad ? 1 : 0)) || byScore(a, c));
         _brandTotals[b] = arr.length;
-        main = main.concat(viewMode === "all" && expandedBrands.has(b) ? arr : arr.slice(0, PER_BRAND_SHOW));   // v6.33: "แบรนด์ละ 5 รุ่น" = 5 รุ่นเสมอ ไม่มีปุ่ม · "แสดงทั้งหมด" = มีปุ่ม "แสดงเพิ่มเติม" ให้กดขยายทีละแบรนด์
-        top5 = top5.concat(arr.slice(0, PER_BRAND_SHOW)); full = full.concat(arr);                            // ใช้กับตารางเปรียบเทียบ (เลือกโหมดแยกต่างหาก)
+        main = main.concat(viewMode === "all" && expandedBrands.has(b) ? arr : arr.slice(0, showN(b)));   // v6.33: "แบรนด์ละ 5 รุ่น" = 5 รุ่นเสมอ ไม่มีปุ่ม · "แสดงทั้งหมด" = มีปุ่ม "แสดงเพิ่มเติม" ให้กดขยายทีละแบรนด์
+        top5 = top5.concat(arr.slice(0, showN(b))); full = full.concat(arr);                            // ใช้กับตารางเปรียบเทียบ (เลือกโหมดแยกต่างหาก)
       });
       return { main: sortItems(main), weak: sortItems(weak), bad: sortItems(bad), ourSim: [], top5: sortItems(top5), full: sortItems(full) };
     }
@@ -949,7 +951,7 @@
             <span class="absolute top-3 left-3 text-[11px] font-bold tracking-wide uppercase ${isOur(x) ? "bg-slate-900 border border-slate-900 text-white" : "bg-white/95 border border-slate-200 text-slate-700"} px-2.5 py-1 rounded-lg">${isOur(x) ? "★ " : ""}${esc(x.brand)}</span>
             <div class="absolute top-2 right-2">${scoreRing(x.matchScore, 44)}</div>
             <button data-id="${esc(x.id)}" onclick="toggleCompare(this.dataset.id)" class="cmpbtn absolute bottom-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${cmpSel.indexOf(x.id) >= 0 ? "bg-pink-500 border-pink-500 text-white" : "bg-white/95 border-slate-200 text-slate-600 hover:border-pink-400"}">${cmpSel.indexOf(x.id) >= 0 ? "✓ เลือกเทียบ" : "+ เทียบ"}</button>
-            ${x.imageScore != null ? `<span class="absolute bottom-2 right-2 bg-white/95 border border-slate-200 text-[11px] text-slate-600 px-2 py-0.5 rounded-md">รูป ${x.imageScore}% · รายละเอียด ${x.textScore ?? "-"}%</span>` : ""}
+            ${x.imageScore != null ? `<span class="absolute bottom-2 right-2 bg-white/95 border border-slate-200 text-[11px] text-slate-600 px-2 py-0.5 rounded-md">รูป ${x.imageScore}% · รายละเอียด ${x.textScore ?? "-"}%${x.rawScore != null && x.matchScore < x.rawScore ? ` · หัก ${x.rawScore - x.matchScore} (ขัดเงื่อนไข)` : ""}</span>` : ""}
           </div>
           <div class="p-3 flex-1 flex flex-col gap-1.5">
             <h4 class="font-semibold text-slate-900 text-sm leading-snug">${esc(x.title)}</h4>
@@ -979,13 +981,13 @@
       const groups = {}, order = [];
       items.forEach(x => { if (!groups[x.brand]) { groups[x.brand] = []; order.push(x.brand); } groups[x.brand].push(x); });
       return order.map(b => {
-        const n = groups[b].length, total = _brandTotals[b] || n, more = viewMode === "all" && total > PER_BRAND_SHOW, expanded = more && n >= total;
+        const n = groups[b].length, total = _brandTotals[b] || n, more = viewMode === "all" && total > showN(b), expanded = more && n >= total;
         const tone = brandTone(b);
         const btnCss = `border:2px dashed ${tone.solid};background:${tone.tint};color:${tone.solid};border-radius:16px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.5;padding:10px 6px;text-align:center`;
         const btn = !more ? "" : expanded
-          ? `<button type="button" data-b="${esc(b)}" onclick="expandBrand(this.dataset.b)" style="${btnCss};min-height:72px">▲ ย่อกลับ<br>เหลือ ${PER_BRAND_SHOW} รุ่น</button>`
+          ? `<button type="button" data-b="${esc(b)}" onclick="expandBrand(this.dataset.b)" style="${btnCss};min-height:72px">▲ ย่อกลับ<br>เหลือ ${showN(b)} รุ่น</button>`
           : `<button type="button" data-b="${esc(b)}" onclick="expandBrand(this.dataset.b)" style="${btnCss}">+ แสดงเพิ่มเติม<br>อีก ${total - n} รุ่น ›</button>`;
-        const cols = more && !expanded ? `repeat(${PER_BRAND_SHOW},minmax(185px,1fr)) 112px` : `repeat(${PER_BRAND_SHOW},minmax(185px,1fr))`;
+        const cols = more && !expanded ? `repeat(${showN(b)},minmax(185px,1fr)) 112px` : `repeat(${showN(b)},minmax(185px,1fr))`;
         return `
         <section class="col-span-full">
           <div class="flex items-center gap-2 pt-2 pb-2">
@@ -1039,7 +1041,7 @@
     function closeImg() { const o = $("imgLightbox"); if (o) o.style.display = "none"; }
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeImg(); });
     // v6.29: สีประจำแบรนด์ในตาราง (แถบซ้าย + พื้นจาง + ชิปชื่อแบรนด์)
-    const BRAND_RGB = { "Wacoal": [219, 39, 119], "Triumph": [220, 38, 38], "Sabina": [124, 58, 237], "B'me": [13, 148, 136], "Wienna": [37, 99, 235], "BSC": [234, 88, 12], "Uniqlo": [202, 138, 4] };
+    const BRAND_RGB = { "Wacoal": [219, 39, 119], "Triumph": [220, 38, 38], "Sabina": [124, 58, 237], "B'me": [13, 148, 136], "Wienna": [37, 99, 235], "BSC": [234, 88, 12], "Uniqlo": [202, 138, 4], "Guy Laroche": [159, 18, 57] };
     function brandTone(b) {
       let c = BRAND_RGB[b];
       if (!c) { let h = 0; String(b).split("").forEach(ch => h = (h * 31 + ch.charCodeAt(0)) % 360); const f = (n, k = (n + h / 30) % 12) => Math.round(255 * (0.4 - 0.3 * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); c = [f(0), f(8), f(4)]; }
@@ -1087,13 +1089,7 @@
           <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px"><b style="font-size:12px;color:#334155">เลือกรุ่นที่จะเทียบ · เลือกแล้ว ${tblPick.size} จาก ${tblSrc.full.length} รุ่น</b>${act("all", "เลือกทั้งหมด")}${act("top5", "5 รุ่นแรกของแต่ละแบรนด์")}${act("none", "ล้างที่เลือก")}</div>
           ${ord.map(b => `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px"><span style="display:inline-block;min-width:74px;background:${brandTone(b).solid};color:#fff;border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700;text-transform:uppercase;text-align:center">${esc(b)}</span>${byb[b].map(x => `<label style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${tblPick.has(x.id) ? brandTone(b).solid : "#e2e8f0"};background:${tblPick.has(x.id) ? brandTone(b).tint : "#fff"};border-radius:8px;padding:3px 8px;font-size:12px;cursor:pointer"><input type="checkbox" data-id="${esc(x.id)}" ${tblPick.has(x.id) ? "checked" : ""} onchange="tblToggle(this.dataset.id)">${esc(x.code || x.title)} <b style="color:${scoreColor(x.matchScore)}">${x.matchScore}%</b></label>`).join("")}</div>`).join("")}</div>`;
       }
-      let moreBar = "";
-      if (tblMode === "top5") {
-        const tot = {}; tblSrc.full.forEach(x => tot[x.brand] = (tot[x.brand] || 0) + 1);
-        const bs = Object.keys(tot).filter(b => tot[b] > PER_BRAND_SHOW);
-        if (bs.length) moreBar = `<div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px solid #f1f5f9"><span style="font-size:12px;color:#64748b">แบรนด์ที่มีเกิน ${PER_BRAND_SHOW} รุ่น:</span>${bs.map(b => { const t = brandTone(b), open = tblExpanded.has(b);
-          return `<button type="button" data-b="${esc(b)}" onclick="tblMore(this.dataset.b)" style="border:2px dashed ${t.solid};background:${t.tint};color:${t.solid};border-radius:10px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer">${open ? "▲ ย่อ " + esc(b) : "+ แสดงเพิ่มเติม " + esc(b) + " (อีก " + (tot[b] - PER_BRAND_SHOW) + " รุ่น)"}</button>`; }).join("")}</div>`;
-      }
+      const moreBar = "";   // v6.40: ไม่แสดงแถบ "แบรนด์ที่มีเกิน 5 รุ่น · แสดงเพิ่มเติม" ใต้ตาราง
       const emptyRow = list.length ? "" : `<tr><td colspan="6" class="p-4 text-center text-xs text-slate-400">ยังไม่ได้เลือกรุ่น — ติ๊กรุ่นที่ต้องการเทียบในกรอบด้านบน</td></tr>`;
       const rows = refRow + emptyRow + list.map(({ x, rank }) => `
         <tr class="border-t border-slate-100" style="background:${brandTone(x.brand).tint}">
@@ -1198,7 +1194,7 @@
           <td class="c">${rank}</td>
           <td><div class="th">${x.imageUrl ? `<img src="${img(x.imageUrl)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}</div></td>
           <td><b>${isOur(x) ? "★ " : ""}${esc(x.brand)}</b><div>${esc(x.title)}</div><div class="mut">${esc(x.code || "")}</div></td>
-          <td class="c"><b>${x.matchScore}%</b><div class="mut">รูป ${x.imageScore ?? "-"} · ราย ${x.textScore ?? "-"}</div></td>
+          <td class="c"><b>${x.matchScore}%</b><div class="mut">รูป ${x.imageScore ?? "-"} · ราย ${x.textScore ?? "-"}${x.rawScore != null && x.matchScore < x.rawScore ? " · หัก " + (x.rawScore - x.matchScore) : ""}</div></td>
           <td class="r"><b>${x.price ? baht(x.price) : "–"}</b>${x.compareAt ? `<div class="mut s">${baht(x.compareAt)}</div>` : ""}</td>
           <td class="c">${d ? `<span class="tag red">-${d}%</span>` : "–"}</td>
           <td>${esc(x.promoName || "–")}</td>
@@ -1674,19 +1670,23 @@
       callApi({ action: "suggest", q, token: store.get("pis_token", "") }).then(r => {
         if (my !== sugSeq || selectedBase64Image) return; sugLast = q; const d = r.data || [], box = $("suggestBox");
         if (!d.length) { box.classList.add("hidden"); return; }
-        box.classList.remove("hidden");
-        box.innerHTML = `<p class="text-[11px] text-slate-500 mb-1">รุ่น Wacoal ที่ใกล้เคียง <span class="text-slate-400">(จากแคตตาล็อก — กดเพื่อใช้รหัสรุ่นนี้ ระบบจะใช้รูปรุ่นนั้นเป็นรูปอ้างอิง)</span></p>
-          <div class="flex gap-2 overflow-x-auto pb-1">${d.map(x => `<button type="button" data-code="${esc(x.code)}" data-img="${esc(x.imageUrl)}" data-f="${esc((x.filters || []).join(","))}" data-p="${x.price || ""}" onclick="pickSuggest(this.dataset.code, this.dataset.img, this.dataset.f, this.dataset.p)" class="shrink-0 flex items-center gap-2 border border-slate-200 bg-white hover:border-pink-400 rounded-xl p-1.5 pr-3 text-left max-w-[15rem]">
-            <img src="${esc(x.imageUrl)}" referrerpolicy="no-referrer" class="w-10 h-10 rounded-lg object-cover bg-slate-50" onerror="this.style.visibility='hidden'">
-            <span class="min-w-0"><b class="block text-xs text-slate-800">${esc(x.code)}${x.price ? ` <span class="font-normal text-slate-500">฿${Number(x.price).toLocaleString()}</span>` : ""}</b><span class="block text-[11px] text-slate-500 truncate">${esc(x.title)}</span></span></button>`).join("")}</div>`;
+        renderPicks(d, "✨ รุ่น Wacoal ที่ใกล้เคียง " + d.length + " รุ่น", "");   // แบบเดียวกับผล AI หารูป
       }).catch(() => {});
     }
     function renderAiPicks(d, understood, usedAi) {
       const box = $("suggestBox"); box.classList.remove("hidden");
       if (!d.length) { box.innerHTML = `<p class="text-[12px] text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">AI ไม่พบรูปรุ่นที่ตรงกับคำอธิบายนี้ในแคตตาล็อก Wacoal — ไม่เป็นไร ค้นจากข้อความต่อได้เลย</p>`; return; }
+      renderPicks(d, "✨ AI เลือกรูปให้ " + d.length + " รุ่น", usedAi && understood && understood.length ? "· AI เข้าใจว่า: " + understood.map(esc).join(" · ") : usedAi ? "" : "· (AI ไม่ตอบ ใช้การจับคำจากชื่อสินค้าแทน)");
+    }
+    // v6.39: รูปแบบเดียวกันทั้ง "AI หารูป" และ "รุ่นที่ใกล้เคียงขณะพิมพ์" — การ์ดรูป + ตัวเลือก รูปอย่างเดียว / รูป + รายละเอียด
+    function renderPicks(d, head, sub) {
+      const box = $("suggestBox"); box.classList.remove("hidden");
       box.innerHTML = `<div class="rounded-2xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-violet-50 p-3">
-        <p class="text-[12px] font-bold text-fuchsia-800">✨ AI เลือกรูปให้ ${d.length} รุ่น <span class="font-normal text-slate-500">${usedAi && understood && understood.length ? "· AI เข้าใจว่า: " + understood.map(esc).join(" · ") : usedAi ? "" : "· (AI ไม่ตอบ ใช้การจับคำจากชื่อสินค้าแทน)"}</span></p>
+        <p class="text-[12px] font-bold text-fuchsia-800">${head} <span class="font-normal text-slate-500">${sub}</span></p>
         <p class="text-[11px] text-slate-500 mb-2">รูปมาจากแคตตาล็อก Wacoal จริง — กดรูปที่ใช่เพื่อใช้เป็นรูปอ้างอิง</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px"><span style="font-size:12px;font-weight:700;color:#86198f">เมื่อกดรูปที่ใช่ ให้ค้นด้วย:</span>
+          <div style="display:inline-flex;gap:2px;background:#fff;border-radius:10px;padding:2px;border:1px solid #f5d0fe"><button id="aiBasisImg" type="button" onclick="setBasis('image')" style="border:0;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer">รูปอย่างเดียว</button><button id="aiBasisBoth" type="button" onclick="setBasis('both')" style="border:0;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer">รูป + รายละเอียด</button></div>
+          <span style="font-size:11px;color:#a21caf">รูปอย่างเดียว = ไม่ใส่รหัส/ตัวกรอง/ราคา ลงในช่องค้นหา ไม่ต้องกดล้างทีหลัง</span></div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">${d.map(x => `<button type="button" data-code="${esc(x.code)}" data-img="${esc(x.imageUrl)}" data-f="${esc((x.filters || []).join(","))}" data-p="${x.price || ""}" onclick="pickSuggest(this.dataset.code, this.dataset.img, this.dataset.f, this.dataset.p)" class="group text-left rounded-xl bg-white border border-slate-200 hover:border-fuchsia-400 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
           <img src="${esc(x.imageUrl)}" referrerpolicy="no-referrer" loading="lazy" class="w-full aspect-square object-contain bg-slate-50" onerror="this.style.visibility='hidden'">
           <span class="block px-2 py-1.5"><b class="block text-xs text-slate-800">${esc(x.code)}${x.price ? ` <span class="font-normal text-slate-500">฿${Number(x.price).toLocaleString()}</span>` : ""}</b><span class="block text-[11px] text-slate-500 line-clamp-2">${esc(x.title)}</span></span></button>`).join("")}</div></div>`;
@@ -1706,7 +1706,21 @@
       if (!url || selectedBase64Image) return; autoPrev = true; const im = $("imagePreview"); im.src = url; im.referrerPolicy = "no-referrer";
       im.classList.remove("hidden"); $("removeImgBtn").classList.remove("hidden"); $("dropHint").classList.add("hidden");
     }
+    function loadPickImage(code, imgUrl, guard) {
+      if (!imgUrl) return; showAutoPreview(imgUrl);   // เห็นรูปทันที แล้วพยายามโหลดเป็นรูปอ้างอิงจริง
+      fetch(imgUrl).then(r => { if (!r.ok) throw 0; return r.blob(); })
+        .then(b => { if (guard && $("searchInput").value.trim() !== code) return; autoPrev = false; selectedBase64Image = null; loadImageFile(new File([b], "ref.jpg", { type: b.type || "image/jpeg" })); })
+        .catch(() => {});   // โหลดไม่ได้ (CORS) → คงพรีวิวไว้ ให้เซิร์ฟเวอร์ใช้รูปจากแคตตาล็อกตอนค้น
+    }
     function pickSuggest(code, imgUrl, fcsv, price) {
+      pickedCode = code; lastPick = [code, imgUrl, fcsv, price];
+      if (basis === "image") {   // v6.38: รูปอย่างเดียว — ใช้เฉพาะรูป ไม่ใส่รหัส/ตัวกรอง/ราคาลงช่อง
+        $("suggestBox").classList.add("hidden");
+        const nt = $("filterNote");
+        nt.innerHTML = `ใช้รูปของรุ่น <b>${esc(code)}</b> เป็นรูปอ้างอิง · ค้นด้วย<b>รูปอย่างเดียว</b> (ไม่ใช้รหัส ข้อความ ตัวกรอง หรือราคา) <button type="button" onclick="reapplyPick()" class="ml-1 underline font-semibold">เปลี่ยนเป็นรูป + รายละเอียด</button>`;
+        nt.classList.remove("hidden");
+        return loadPickImage(code, imgUrl, false);
+      }
       const pr = Math.round(Number(price)); const pin = $("ourPrice");   // ราคาสินค้า = ราคาของรุ่น Wacoal ที่เลือก (ราคาจากแคตตาล็อก)
       if (pr > 0) { pin.value = pr; onOurPriceChange(); }
       $("searchInput").value = code; sugLast = code; $("suggestBox").classList.add("hidden");
@@ -1719,10 +1733,7 @@
         note.classList.remove("hidden");
       } else if (pr > 0) { note.innerHTML = `ใส่ราคา <b>฿${pr.toLocaleString()}</b> ของรุ่น <b>${esc(code)}</b> ในช่อง “ราคาสินค้า” แล้ว`; note.classList.remove("hidden"); }
       else note.classList.add("hidden");
-      if (!imgUrl) return; showAutoPreview(imgUrl);   // เห็นรูปทันที แล้วพยายามโหลดเป็นรูปอ้างอิงจริง
-      fetch(imgUrl).then(r => { if (!r.ok) throw 0; return r.blob(); })
-        .then(b => { if ($("searchInput").value.trim() !== code) return; autoPrev = false; selectedBase64Image = null; loadImageFile(new File([b], "ref.jpg", { type: b.type || "image/jpeg" })); })
-        .catch(() => {});   // โหลดไม่ได้ (CORS) → คงพรีวิวไว้ ให้เซิร์ฟเวอร์ใช้รูปจากแคตตาล็อกตอนค้น
+      return loadPickImage(code, imgUrl, true);
     }
     /* ประวัติ + ชุดเงื่อนไข (เก็บในเบราว์เซอร์นี้เท่านั้น) */
     let hist = [], presets = [];
